@@ -2,22 +2,9 @@
 Con spicy NPL quiero pasarle una frase y que me saque las caracteristicas morg¡fologicas y sintacticas de cada palabra.
 Tambien quiero que cree relaciones entre ellas.
 """
-import re
 import spacy
 from unidecode import unidecode
-from spacy import displacy
 from spacy.matcher import Matcher
-from spacy.tokens import Span
-from spacy.tokens import Doc
-from spacy.tokens import Token
-from spacy.symbols import nsubj, VERB
-from spacy.lang.es import Spanish
-from spacy.lang.es.stop_words import STOP_WORDS
-from spacy.lang.es.examples import sentences
-from spacy.pipeline import EntityRuler
-from spacy.pipeline import EntityRecognizer
-from spacy.pipeline import EntityLinker
-from spacy.pipeline import EntityRuler
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -28,27 +15,10 @@ from utils.Relacion import Relacion
 from constants.type_morfologico import *
 from constants.type_sintax import *
 from utils.TokenNLP import TokenNLP, TYPE_RELACION, TYPE_PALABRA
-from utils.utils_text import son_pal_rel_contiguas
-# from visualizacion.graficoFinal2 import print_graph
-from visualizacion.grafico_v2 import print_graph, generate_graph
+from visualizacion.grafico_v2 import  generate_graph
 
 import sys
 from io import StringIO
-
-
-
-# python -m spacy download es_dep_news_trf
-
-
-
-
-#LIST_TYPES_CONNECTOR_RELATION = [TYPE_MORF_ADP, TYPE_MORF_ADP, TYPE_MORF_CONJ, TYPE_MORF_CCONJ, TYPE_MORF_SCONJ,
-#                                 TYPE_MORF_DET, TYPE_MORF_PRON, TYPE_MORF_PART, TYPE_MORF_VERB, TYPE_MORF_AUX]
-
-
-
-#LIST_TYPES_SINTAX_RELATION = [TYPE_SINTAX_ADVMOD, TYPE_SINTAX_NPADVMOD]
-
 
 
 def print_spacy_tree(doc):
@@ -334,20 +304,24 @@ def preprocesing_oracion_nlp(texto):
     nlp = None
     list_spacy_loads = ['es_dep_news_trf', 'es_core_news_lg', 'es_core_news_md', 'es_core_news_sm', 'es_dep_news_trf']
     while not encontrado and list_spacy_loads != []:
-        spacy_load = list_spacy_loads.pop(0)
-        nlp = spacy.load(spacy_load)
-        texto = completar_sujeto_omitido(texto, nlp)
-        doc = nlp(texto)
-        print("Spacy load: ", spacy_load)
-        print("Resultado sin procesar: ")
-        imprimir_doc(doc)
-        #print_spacy_tree(doc)
+        try:
+            spacy_load = list_spacy_loads.pop(0)
+            nlp = spacy.load(spacy_load)
+            texto = completar_sujeto_omitido(texto, nlp)
+            doc = nlp(texto)
+            print("Spacy load: ", spacy_load)
+            print("Resultado sin procesar: ")
+            imprimir_doc(doc)
+            #print_spacy_tree(doc)
 
-        # Cambiar los ROOT personales por sujetos y los verbos principales por ROOT con sus relaciones.
-        if not hay_sujeto(doc):
-            doc, encontrado = cambiar_root_nombre_propio(doc)
-        else:
-            encontrado = True
+            # Cambiar los ROOT personales por sujetos y los verbos principales por ROOT con sus relaciones.
+            if not hay_sujeto(doc):
+                doc, encontrado = cambiar_root_nombre_propio(doc)
+            else:
+                encontrado = True
+        except Exception as e:
+            print("Error con spacy load: ", e)
+            continue
 
     print("#### Resultado añadiendo sujeto omitido: ")
     imprimir_doc(doc)
@@ -431,15 +405,7 @@ def spacy_patrones(doc, nlp):
         print("CCT: ", matched_span.text)
         for token in matched_span:
             if token.dep_ in LIST_SINTAX_PATTERN_MODIFY:
-                #print("Old token:")
-                #print(token.text, ": ", token.idx, token.lemma_, "|| pos_:", token.pos_, "|| tag_:", token.tag_,
-                #      "|| dep_:", token.dep_, "|| ent_type_:", token.ent_type_, "|| ", token.shape_, token.is_alpha,
-                #      token.is_stop)
                 token.dep_ = TYPE_SINTAX_PATTERN_CCT
-                #print("New token:")
-                #print(token.text, ": ", token.idx, token.lemma_, "|| pos_:", token.pos_, "|| tag_:", token.tag_,
-                #      "|| dep_:", token.dep_, "|| ent_type_:", token.ent_type_, "|| ", token.shape_, token.is_alpha,
-                #      token.is_stop)
 
     ######################################################
     ######################################################
@@ -521,69 +487,12 @@ def get_list_token_oraciones(doc, list_oracion_actual, list_token_oraciones):
         list_token_oraciones.append(list_oracion_actual)
 
 
-texto = "Mi perro y mi gato juegan juntos en el parque con una pelota"
+def borrar_imagenes():
+    pass
 
-#texto = "Mi perro, mi gato y mi loro juegan juntos en el parque con una pelota"
-
-
-texto = "Mi perro es un golden retriever de tres años que adora jugar con su pelota en el parque y siempre me da la bienvenida moviendo la cola cuando llego a casa."
-texto = "El sol brilla en el cielo azul los pájaros cantan en los árboles verdes el viento sopla suavemente a través de las hojas en el campo las vacas pastan tranquilamente en la ciudad la gente camina apresurada por las calles en el mar los barcos navegan en aguas cristalinas en todas partes la naturaleza sigue su curso y el mundo sigue girando."
-texto = "La vida es como un viaje en el que cada uno elige su propio camino a veces es fácil otras veces es difícil hay momentos de alegría y momentos de tristeza pero sin importar qué tan difícil sea el camino siempre hay algo que aprender cada experiencia buena o mala nos ayuda a crecer y a ser más fuertes la naturaleza nos rodea y nos regala su belleza y su sabiduría hay que aprender a apreciarla y cuidarla al final del camino lo importante no es lo que hayamos acumulado sino las personas que hayamos tocado y las huellas que hayamos dejado en el mundo."
-texto = "Mi novia tiene una toalla de hospital para su perro"
-
-
-texto = "Isthar come paja en el pajar mientras Jasper le mira mientras Tina caza palomas para cenar"
-#texto = "Mi perro y mi gato juegan juntos en el parque con una pelota"
-#texto = "Me llamo Rubén y tengo 25 años. Vivo en Madrid y trabajo en una empresa de tecnología. Me gusta leer, viajar y pasar tiempo con mi familia y amigos."
-#texto = "Los Austrias gobernaron España en el siglo XVI y XVII, responsables también de la Inquisición, expulsión de judíos. Su legado: arquitectura y arte en Madrid y Córdoba."
-#texto = "Ruben cocina hamburguesas en la Freidora de aire"
-#texto = "La naturaleza es impresionante en su variedad de paisajes, desde montañas majestuosas y extensas llanuras hasta océanos y ríos caudalosos."
-
-###################################################################################################
-##### TEST Flat
-texto = "Felipe II fué rey de españa hace tiempo. Maria Antonieta era reina de Francia."
-texto = "Mientras programo, un pajaro ha saltado por el balcón y se ha comido una golondrina"
-# Para esta, idenfica mal el CD ya que pone a Golondrina como sujeto
-# el SmallModel si calcula bien que es 'obj', es decir, CD.
-#texto = "La naturaleza es impresionante en su variedad de paisajes"
-###################################################################################################
-
-#### TEST Root-VB a SUJ-VB
-texto = "El perro de mi vecino se llama Toby y sale a jugar al parque todos los días"
-texto = "Me llamo Ruben, estudio informatica y espero poder acabar el master algún día"
-texto = "Me llamo Ruben, estudio informatica y soy de Madrid"
-
-
-#### TEST Sujeto omitido
-texto = "Me voy a jugar al futbol"
-texto = "El otro día me llamaron de una empresa nueva"
-texto = "Mi perro es un golden retriever de tres años que adora jugar con su pelota en el parque y siempre me da la bienvenida moviendo la cola cuando llego a casa."
-
-
-# conflictivo con muchos sujetos omitidos, a ver cómo saco las relaciones de aqui.
-texto = "Pedro se compró un coche nuevo la semana pasada porque el suyo, que tenía ya 10 años, se rompió"
-
-
-########################################################################################################################
-########################################################################################################################
-########################################################################################################################
-#texto = "Ruben cocina hamburguesas en la Freidora de aire ayer"
-
-
-#texto = "Yo le añadí un poco de cilantro a la pasta para que supiera más rica. Tras esto, la quemé"
-#texto = "Rubén le regaló juguetes a Okami por su cumpleaños. Pero ella los rompió en dos minutos."
-# TODO que el DOS vaya dentro del rectangulo
-#  Que el 'a Okami' lo pille como CI y no directo
-
-
-#spacy_load = "es_core_news_lg"
-#spacy_load = "es_core_news_sm"
-#spacy_load = "es_core_news_md"
-#spacy_load = "es_core_news_lg"
-# NLTK, AllenNLP y StanfordNLP
 
 txt_prints = ""
-def ejecutar_texto(texto):
+def ejecutar_nlp_texto(texto):
     # Crear un objeto StringIO para redirigir la salida
     string_io = StringIO()
     #sys.stdout = string_io
@@ -622,93 +531,4 @@ def ejecutar_texto(texto):
             print("Error: ", e)
             ok_exec = False
         num_intentos += 1
-
-
-
-########################################################################################################################
-########################################################################################################################
-########################################################################################################################
-########################################################################################################################
-########################################################################################################################
-########################################################################################################################
-########################################################################################################################
-
-ejecutar_texto(texto)
-
-########################################################################################################################
-########################################################################################################################
-########################################################################################################################
-########################################################################################################################
-########################################################################################################################
-########################################################################################################################
-########################################################################################################################
-
-app = Flask(__name__)
-CORS(app)
-################################################
-
-
-@app.route('/obtener_prints_python', methods=['GET'])
-def obtener_prints_python():
-    global txt_prints
-    return jsonify(texto=txt_prints)
-
-
-
-
-@app.route('/', methods=['POST'])
-def recibir_texto():
-    borrar_imagenes_2()
-    texto = request.json['texto']
-
-    import os
-    os.environ['PRINT_MATRIX'] = 'False'
-    os.environ['PRINT_IMG'] = 'False'
-    os.environ['PRINT_GRAPH'] = 'False'
-    os.environ['ZOOM_ACTIVE'] = 'False'
-
-
-    if texto is None or texto == "":
-        return "No se ha recibido texto"
-
-    # Aquí puedes realizar cualquier procesamiento o análisis del texto que desees
-    print("Texto: ", texto)
-    ejecutar_texto(texto)
-    # El otro día me llamaron de una empresa nueva
-
-    Palabra.id_actual = 9
-    Palabra.palabras_dict = {}
-    Palabra.palabras_dict_id = {}
-    Palabra.relaciones_dict_origen = {}
-    Palabra.relaciones_dict_destino = {}
-    Relacion.id_actual = -9
-    Relacion.relaciones_dict = {}
-    Relacion.relaciones_dict_id = {}
-    Grafo.id_actual = 0
-    TokenNLP.nlp_token_dict = {}
-
-    return 'Texto recibido: {}'.format(texto)
-
-
-
-@app.route('/borrar-imagenes', methods=['POST'])
-def borrar_imagenes():
-    # Funcion desactivada ya que se le llama desde JS y no es necesario
-    pass
-def borrar_imagenes_2():
-    import os
-    ruta_imagenes = 'web_project/imagenes/'  # Ruta de la carpeta donde se encuentran las imágenes
-
-    # Eliminar todas las imágenes en la ruta especificada
-    for filename in os.listdir(ruta_imagenes):
-        file_path = os.path.join(ruta_imagenes, filename)
-        if os.path.isfile(file_path):
-            os.remove(file_path)
-
-    return 'Imágenes borradas exitosamente'
-
-
-
-#if __name__ == '__main__':
-#    app.run(host='0.0.0.0', port=5000)
 

@@ -1,7 +1,6 @@
-import math
+
 import random
 import shutil
-import time
 import os
 
 import networkx as nx
@@ -10,23 +9,16 @@ from matplotlib.patches import FancyArrowPatch, RegularPolygon, Ellipse, Rectang
 
 from utils.Grafo import Grafo
 from utils.Palabra import Palabra
-from utils.Relacion import Relacion
 
-from constants.figuras import *
-from constants.type_morfologico import *
-from constants.type_sintax import *
 from constants import type_sintax
 from constants import colores_figura, colores_figura_letra, colores
 from constants.figuras import *
 from constants import tam_figuras
 
-from utils.utils_text import unir_list_all_relaciones, unir_siglos_annos_all_list, unir_conjuncion_y, \
-    truncate_a_8_relaciones, unir_primera_palabra
+from utils.utils_text import truncate_a_8_relaciones
 
 from constants.direcciones_relaciones import DIR_DCHA, DIR_DCHA_ABAJO, DIR_DCHA_ARRIBA, DIR_ABAJO, DIR_ARRIBA, \
-    DIR_IZQ, DIR_IZQ_ARRIBA, DIR_IZQ_ABAJO, FIND_DIR_CENTRO, FIND_DIR_DCHA, FIND_DIR_DCHA_ABAJO, FIND_DIR_DCHA_ARRIBA, \
-    FIND_DIR_ABAJO, FIND_DIR_ARRIBA, FIND_DIR_IZQ, FIND_DIR_IZQ_ARRIBA, FIND_DIR_IZQ_ABAJO, DICT_DIR_BY_ORIGEN, CENTRO, \
-    DICT_PROX_DIR, OPOSIT_DIR
+    DIR_IZQ, DIR_IZQ_ARRIBA, DIR_IZQ_ABAJO, CENTRO, OPOSIT_DIR
 from visualizacion.utils.direcciones import refresh_directions, get_rel_origen_and_dest_unidas
 from visualizacion.utils.posicionesXY import get_next_location
 from visualizacion.utils.matrix_functions import generate_matrix, get_pos_media_matrix, imprimir_matriz, \
@@ -1004,9 +996,9 @@ def _print_graph(list_palabras, list_relaciones, position_elems, matrix_dim):
 
     fig = None
     # borrar la carpeta img_save/ y crearla de nuevo
-    if os.path.exists("web_project/imagenes"):
-        shutil.rmtree("web_project/imagenes")
-    os.mkdir("web_project/imagenes")
+    if os.path.exists("../web_project/imagenes"):
+        shutil.rmtree("../web_project/imagenes")
+    os.mkdir("../web_project/imagenes")
 
     for i in range(len(list_palabras_zoom)):
         list_palabras = list_palabras_zoom[i]
@@ -1033,7 +1025,7 @@ def _print_graph(list_palabras, list_relaciones, position_elems, matrix_dim):
         ax.plot()
 
         # Guardar figura en archivo
-        plt.savefig(f"web_project/imagenes/imagen{i}")
+        plt.savefig(f"../web_project/imagenes/imagen{i}")
 
         plt.show()
 
