@@ -15,7 +15,7 @@ from utils.Relacion import Relacion
 from constants.type_morfologico import *
 from constants.type_sintax import *
 from utils.TokenNLP import TokenNLP, TYPE_RELACION, TYPE_PALABRA
-from visualizacion.grafico_v2 import  generate_graph
+from visualizacion.generator_graph import  generate_graph
 
 import sys
 from io import StringIO
@@ -493,42 +493,51 @@ def borrar_imagenes():
 
 txt_prints = ""
 def ejecutar_nlp_texto(texto):
+    import pickle
     # Crear un objeto StringIO para redirigir la salida
     string_io = StringIO()
     #sys.stdout = string_io
     global txt_prints
 
-    num_intentos = 0
-    ok_exec = False
-    while not ok_exec and num_intentos < 20:
-        try:
-            list_palabras, list_relaciones = get_list_palabras_relaciones(texto)
-            if list_palabras is None or list_palabras == []:
-                return "No se ha recibido texto"
+    list_palabras = []
+    list_relaciones = []
+    try:
+        list_palabras, list_relaciones = get_list_palabras_relaciones(texto)
+        if list_palabras is None or list_palabras == []:
+            return "No se ha recibido texto"
 
-            #print("Palabras: ", list_palabras)
-            #print("Relaciones: ", list_relaciones)
-            for pal in list_palabras:
-                print(pal.to_create_Palabra_str())
+        #print("Palabras: ", list_palabras)
+        #print("Relaciones: ", list_relaciones)
+        for pal in list_palabras:
+            print(pal.to_create_Palabra_str())
 
-            print()
-            for rel in list_relaciones:
-                print(rel.to_create_Relacion_str())
+        print()
+        for rel in list_relaciones:
+            print(rel.to_create_Relacion_str())
 
-            Palabra.refresh_dict_palabras()
+        Palabra.refresh_dict_palabras()
 
-            # Obtener el contenido del string
+        # Obtener el contenido del string
 
-            txt_prints = string_io.getvalue()
-            print(txt_prints)
-            # Restaurar la salida estándar
-            sys.stdout = sys.__stdout__
+        txt_prints = string_io.getvalue()
+        print(txt_prints)
+        # Restaurar la salida estándar
+        sys.stdout = sys.__stdout__
 
-            fig = generate_graph(texto, list_palabras, list_relaciones)
-            if fig is not None:
-                ok_exec = True
-        except Exception as e:
-            print("Error: ", e)
-            ok_exec = False
-        num_intentos += 1
+        #fig = generate_graph(texto, list_palabras, list_relaciones)
+
+    except Exception as e:
+        print("Error: ", e)
+
+    # Antes de serializar, hay que quitar los tokens de las palabras ya que no se pueden serializar
+    for palabra in list_palabras:
+        palabra.token = None
+        palabra.token_nlp = None
+    for relacion in list_relaciones:
+        relacion.token = None
+        relacion.token_nlp = None
+
+    # Serializar las listas de objetos
+    datos_serializados = pickle.dumps((list_palabras, list_relaciones))
+    return datos_serializados
 
