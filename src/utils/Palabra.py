@@ -184,27 +184,32 @@ class Palabra:
 
 
     def aciones_especificas_tipo_palabra(self):
+        self.tipo_figura = figuras.FIGURA_RECTANGULO
+        if self.tipo_morf == TYPE_MORF_VERB:
+            # en caso de que sea n-aria, pero si no, se pone en la flecha.
+            self.tipo_figura = figuras.FIGURA_ROMBO
+
         if self.lugar_sintactico == TYPE_SINTAX_NSUBJ:
             self.importancia = 1
             self.color_figura = colores_figura.COLOR_SINTAX_NSUBJ
-            self.tipo_figura = figuras.FIGURA_RECTANGULO
+            #self.tipo_figura = figuras.FIGURA_RECTANGULO
         elif self.lugar_sintactico == TYPE_SINTAX_ROOT:
             self.importancia = 2
             self.color_figura = colores_figura.COLOR_SINTAX_ROOT
-            self.tipo_figura = figuras.FIGURA_CIRCULO
+            #self.tipo_figura = figuras.FIGURA_CIRCULO
 
         elif self.tipo_morf == TYPE_MORF_VERB:
             self.color_figura = colores_figura.COLOR_MORF_VERB
-            self.tipo_figura = figuras.FIGURA_ELIPSE
+            #self.tipo_figura = figuras.FIGURA_ELIPSE
         elif self.tipo_morf == TYPE_SINTAX_PATTERN_CCL:
             self.color_figura = colores_figura.COLOR_SINTAX_CCL
-            self.tipo_figura = figuras.FIGURA_RECTANGULO
+           # self.tipo_figura = figuras.FIGURA_RECTANGULO
         elif self.tipo_morf == TYPE_SINTAX_PATTERN_CCT:
             self.color_figura = colores_figura.COLOR_SINTAX_CCT
-            self.tipo_figura = figuras.FIGURA_RECTANGULO
+            #self.tipo_figura = figuras.FIGURA_RECTANGULO
         else:
             self.color_figura = colores_figura.DEFAULT
-            self.tipo_figura = figuras.FIGURA_RECTANGULO
+            #self.tipo_figura = figuras.FIGURA_RECTANGULO
 
 
 

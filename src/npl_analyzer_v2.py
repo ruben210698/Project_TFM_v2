@@ -492,7 +492,7 @@ def borrar_imagenes():
 
 
 txt_prints = ""
-def ejecutar_nlp_texto(texto):
+def ejecutar_nlp_texto(texto, local=False):
     import pickle
     # Crear un objeto StringIO para redirigir la salida
     string_io = StringIO()
@@ -538,6 +538,9 @@ def ejecutar_nlp_texto(texto):
         relacion.token_nlp = None
 
     # Serializar las listas de objetos
-    datos_serializados = pickle.dumps((list_palabras, list_relaciones))
-    return datos_serializados
+    if not local:
+        datos_serializados = pickle.dumps((list_palabras, list_relaciones, Palabra, Relacion))
+        return datos_serializados
 
+    else:
+        return list_palabras, list_relaciones, Palabra, Relacion

@@ -127,9 +127,9 @@ def _print_graph(list_palabras, list_relaciones, position_elems, matrix_dim):
 
     fig = None
     # borrar la carpeta img_save/ y crearla de nuevo
-    if os.path.exists("src/web_project/imagenes"):
-        shutil.rmtree("src/web_project/imagenes")
-    os.mkdir("src/web_project/imagenes")
+    if os.path.exists("web_project/imagenes"):
+        shutil.rmtree("web_project/imagenes")
+    os.mkdir("web_project/imagenes")
 
     for i in range(len(list_palabras_zoom)):
         list_palabras = list_palabras_zoom[i]
@@ -156,7 +156,7 @@ def _print_graph(list_palabras, list_relaciones, position_elems, matrix_dim):
         ax.plot()
 
         # Guardar figura en archivo
-        plt.savefig(f"src/web_project/imagenes/imagen{i}")
+        plt.savefig(f"web_project/imagenes/imagen{i}")
 
         plt.show()
 
@@ -568,6 +568,21 @@ def draw_all_nodes(ax, position_elems, list_palabras):
             ax.add_patch(rectangle)
             ax.text(x, y, node_text, fontsize=12, ha='center', va='center', zorder=3,
                     color=dict_color_figura_letra.get(pal.lugar_sintactico, colores.black))
+
+        elif pal.tipo_figura == FIGURA_ROMBO:
+            pal.tam_eje_x_figura = tam_figuras.ROMBO[0] * pal.dimension_x
+            pal.tam_eje_y_figura = tam_figuras.ROMBO[1] * pal.dimension_y
+            polygon_radius = 0.4 * len(node_text)
+            polygon = RegularPolygon((x, y), numVertices=4, radius=polygon_radius, orientation=0,
+                                     color=dict_color_figura.get(pal.lugar_sintactico, color_figura),
+                                     edgecolor='black', zorder=2)
+            ax.add_patch(polygon)
+            ax.text(x, y, node_text, fontsize=12, ha='center', va='center', zorder=3,
+                    color=dict_color_figura_letra.get(pal.lugar_sintactico, colores.black))
+
+
+
+
         #
         elif pal.lugar_sintactico.lower() in (): #(TYPE_SINTAX_FLAT):
             pal.tipo_figura = FIGURA_HEXAGONO

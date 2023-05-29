@@ -14,6 +14,7 @@ from constants import type_sintax
 from constants import colores_figura, colores_figura_letra, colores
 from constants.figuras import *
 from constants import tam_figuras
+from utils.Relacion import Relacion
 
 from utils.utils_text import truncate_a_8_relaciones
 
@@ -631,6 +632,7 @@ def text_tranformations(list_palabras, list_relaciones):
     # el refresh grafo solo lo hace para el 1er grado, pero es suficiente de momento ya que no tenemos todavia la palabra raiz.
     for palabra in list_palabras:
         palabra.refresh_subgrafo_completado()
+        palabra.aciones_especificas_tipo_palabra()
     update_ctes_dim_relaciones_por_num_relaciones(list_palabras)
 
 
@@ -641,7 +643,15 @@ def text_tranformations(list_palabras, list_relaciones):
     return list_palabras, list_relaciones
 
 
-def generate_graph(texto, list_palabras, list_relaciones):
+def generate_graph(texto, list_palabras, list_relaciones, palabra_deserializ, relacion_deserializ):
+    # Palabra.palabras_dict = palabra_deserializ.palabras_dict
+    # Palabra.palabras_dict_id = palabra_deserializ.palabras_dict_id
+    # Palabra.relaciones_dict_origen = palabra_deserializ.relaciones_dict_origen
+    # Palabra.relaciones_dict_destino = palabra_deserializ.relaciones_dict_destino
+
+    # Relacion.relaciones_dict = relacion_deserializ.relaciones_dict
+    # Relacion.relaciones_dict_id = relacion_deserializ.relaciones_dict_id
+
     print(f"Numero de palabras: {len(list_palabras)}")
     list_palabras, list_relaciones = text_tranformations(list_palabras, list_relaciones)
 
