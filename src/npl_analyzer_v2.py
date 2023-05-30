@@ -152,6 +152,28 @@ def get_list_palabras(list_token_nlp_oraciones):
                     nueva_palabra = token_nlp.token_nlp_padre.palabra_que_representa
                     if nueva_palabra is not None and isinstance(nueva_palabra, Palabra):
                         nueva_palabra.add_aux_text(token_nlp.text, token_nlp.position_doc)
+                if token_nlp.tipo_morfol == 'VERB' and token_nlp.lugar_sintact_original in ('xcomp') and \
+                        token_nlp.token_nlp_padre is not None and token_nlp.token_nlp_padre.tipo_morfol == 'VERB':
+                    # Es el verbo que acompaña a otro verbo (adora jugar)
+                    nueva_palabra = token_nlp.token_nlp_padre.palabra_que_representa
+                    if nueva_palabra is not None and isinstance(nueva_palabra, Palabra):
+                        nueva_palabra.add_aux_text(token_nlp.text, token_nlp.position_doc)
+
+
+                # Numeros
+                elif token_nlp.tipo_morfol == 'NUM' and token_nlp.lugar_sintact_original in ('nummod') and \
+                     token_nlp.token_nlp_padre is not None and token_nlp.token_nlp_padre.tipo_morfol == 'NOUN':
+                    nueva_palabra = token_nlp.token_nlp_padre.palabra_que_representa
+                    if nueva_palabra is not None and isinstance(nueva_palabra, Palabra):
+                        nueva_palabra.add_aux_text(token_nlp.text, token_nlp.position_doc)
+
+                # preposision Que (a veces no lo identifica como preposicion)
+                elif token_nlp.token_nlp_padre is not None and token_nlp.token_nlp_padre.tipo_morfol == 'VERB' and \
+                        token_nlp.lema == 'que':
+                    nueva_palabra = token_nlp.token_nlp_padre.palabra_que_representa
+                    if nueva_palabra is not None and isinstance(nueva_palabra, Palabra):
+                        nueva_palabra.add_aux_text(token_nlp.text, token_nlp.position_doc)
+
 
                 elif token_nlp.tipo_morfol == 'PRON' and token_nlp.lugar_sintact_original not in ('nsubj', 'obj') and \
                      token_nlp.token_nlp_padre is not None and token_nlp.token_nlp_padre.tipo_morfol == 'VERB':
@@ -373,9 +395,20 @@ def preprocesing_oracion_nlp(texto):
             token_nlp.refresh_parents_children()
         # quitar todos los tokens que sean de tipo puntuacion
         list_token_nlp = [token_nlp for token_nlp in list_token_nlp if token_nlp.tipo_morfol != TYPE_MORF_PUNCT]
-        list_token_nlp_oraciones.append(list_token_nlp)
+        if list_token_nlp != []:
+            for token_nlp in list_token_nlp:
+                token_nlp.refresh_hijos_token_nlp()
+            list_token_nlp_oraciones.append(list_token_nlp)
 
     return list_token_nlp_oraciones
+
+
+def refresh_hijos_token_nlp(token_nlp, list_token_nlp_oracion):
+    list_hijos = []
+    for token_nlp_hijo in token_nlp.children:
+        list_hijos.append(token_nlp_hijo)
+        list_hijos = list_hijos + det_hijos_token_nlp(token_nlp_hijo)
+    return list_hijos
 
 
 def spacy_patrones(doc, nlp):

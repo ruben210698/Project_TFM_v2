@@ -570,12 +570,24 @@ def draw_all_nodes(ax, position_elems, list_palabras):
                     color=dict_color_figura_letra.get(pal.lugar_sintactico, colores.black))
 
         elif pal.tipo_figura == FIGURA_ROMBO:
+            import matplotlib.patches as patches
             pal.tam_eje_x_figura = tam_figuras.ROMBO[0] * pal.dimension_x
-            pal.tam_eje_y_figura = tam_figuras.ROMBO[1] * pal.dimension_y
-            polygon_radius = 0.4 * len(node_text)
-            polygon = RegularPolygon((x, y), numVertices=4, radius=polygon_radius, orientation=0,
-                                     color=dict_color_figura.get(pal.lugar_sintactico, color_figura),
+            pal.tam_eje_y_figura = (tam_figuras.ROMBO[1] * pal.dimension_x) + pal.dimension_y
+            # Crear el rombo
+            vertices = [(x - pal.tam_eje_x_figura / 2, y),  # Punto izquierdo
+                        (x, y + pal.tam_eje_y_figura / 2),  # Punto superior
+                        (x + pal.tam_eje_x_figura / 2, y),  # Punto derecho
+                        (x, y - pal.tam_eje_y_figura / 2)]  # Punto inferior
+
+            #polygon_radius = 0.4 * len(node_text)
+            #polygon = RegularPolygon((x, y), numVertices=4, radius=polygon_radius, orientation=0,
+            #                         facecolor=dict_color_figura.get(pal.lugar_sintactico, color_figura),
+            #                         edgecolor='black', zorder=2)
+            polygon = patches.Polygon(vertices, closed=True,
+                                    facecolor=dict_color_figura.get(pal.lugar_sintactico, color_figura),
                                      edgecolor='black', zorder=2)
+
+
             ax.add_patch(polygon)
             ax.text(x, y, node_text, fontsize=12, ha='center', va='center', zorder=3,
                     color=dict_color_figura_letra.get(pal.lugar_sintactico, colores.black))
