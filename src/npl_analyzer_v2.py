@@ -38,9 +38,10 @@ def print_spacy_tree(doc):
 
 def get_list_palabras_relaciones(texto):
     list_token_nlp_oraciones = preprocesing_oracion_nlp(texto)
-
+    list_token_nlp_oraciones = preprocesing_detailed(list_token_nlp_oraciones)
     print("#### Tras preprocesamiento: ")
     imprimir_nuevos_tokens_nlp(list_token_nlp_oraciones)
+
 
     list_palabras = get_list_palabras(list_token_nlp_oraciones)
     list_relaciones = get_list_relaciones(list_palabras)
@@ -48,6 +49,58 @@ def get_list_palabras_relaciones(texto):
     relaciones_root_vb_cambio_suj_vb(list_relaciones)
 
     return list_palabras, list_relaciones
+
+def preprocesing_detailed(list_token_nlp_oraciones):
+
+    for oracion_nlp in list_token_nlp_oraciones:
+        refresh_hijos_token_nlp(oracion_nlp)
+        ################################################################
+        # Cuando es in verbo pero no tiene hijos, se añade a la flecha
+        # En este caso, ha habido un error y se ha colocado suelto cuando no se debe y debemos colocarlo
+        # con la relación que le corresponde
+        for token_nlp in oracion_nlp:
+            if token_nlp.tipo_morfol == 'AUX' and token_nlp.token_nlp_padre is not None \
+                    and token_nlp.tokens_hijos == []:
+                # Un verbo suelto. Se deben refrescar las relaciones para que sean correctas.
+                old_token_padre = token_nlp.token_nlp_padre
+                pos_doc_padre = token_nlp.token_nlp_padre.position_doc
+                pos_doc_actual = token_nlp.position_doc
+                if pos_doc_actual < pos_doc_padre and old_token_padre.token_nlp_padre is None:
+                    new_token_hijo = old_token_padre
+                    # aqui obtenemos una lista de elementos que están por delante de la posición actual
+                    # y que son actuales hijos del actual padre. De esta forma buscaremos a la palabra enlazada.
+                    list_posibles_padres = [token for token in token_nlp.token_nlp_padre.tokens_hijos if token.position_doc < pos_doc_actual]
+                    # Se ordena por posicion y se el de mayor posicion
+                    new_token_padre = sorted(list_posibles_padres, key=lambda x: x.position_doc, reverse=True)[0]
+                    token_nlp.token_nlp_padre = new_token_padre
+                    new_token_hijo.tokens_hijos.remove(token_nlp)
+                    new_token_hijo.token_nlp_padre = token_nlp
+                    new_token_padre.tokens_hijos.append(token_nlp)
+                else:
+                    if pos_doc_actual < pos_doc_padre:
+                        list_posibles_hijos = [token for token in token_nlp.token_nlp_padre.tokens_hijos if token.position_doc < pos_doc_actual]
+                        list_posibles_hijos = sorted(list_posibles_hijos, key=lambda x: x.position_doc, reverse=True)
+                    else:
+                        list_posibles_hijos = [token for token in token_nlp.token_nlp_padre.tokens_hijos if token.position_doc > pos_doc_actual]
+                        list_posibles_hijos = sorted(list_posibles_hijos, key=lambda x: x.position_doc, reverse=False)
+
+                    for token_hijo in list_posibles_hijos:
+                        if token_hijo.token_nlp_padre is None:
+                            token_hijo.token_nlp_padre = token_nlp
+                            token_nlp.tokens_hijos.append(token_hijo)
+                            break
+                    # Si no encuentra ninguno, se queda como está
+
+        ################################################################
+
+    return list_token_nlp_oraciones
+
+
+def refresh_hijos_token_nlp(list_token_nlp_oracion):
+    for token in list_token_nlp_oracion:
+        if token.token_nlp_padre != None:
+            token.token_nlp_padre.tokens_hijos.append(token)
+            token.token_nlp_padre.tokens_hijos = list(set(token.token_nlp_padre.tokens_hijos))
 
 
 def relaciones_root_vb_cambio_suj_vb(list_relaciones):
@@ -152,12 +205,14 @@ def get_list_palabras(list_token_nlp_oraciones):
                     nueva_palabra = token_nlp.token_nlp_padre.palabra_que_representa
                     if nueva_palabra is not None and isinstance(nueva_palabra, Palabra):
                         nueva_palabra.add_aux_text(token_nlp.text, token_nlp.position_doc)
-                if token_nlp.tipo_morfol == 'VERB' and token_nlp.lugar_sintact_original in ('xcomp') and \
+                elif token_nlp.tipo_morfol == 'VERB' and token_nlp.lugar_sintact_original in ('xcomp') and \
                         token_nlp.token_nlp_padre is not None and token_nlp.token_nlp_padre.tipo_morfol == 'VERB':
                     # Es el verbo que acompaña a otro verbo (adora jugar)
                     nueva_palabra = token_nlp.token_nlp_padre.palabra_que_representa
                     if nueva_palabra is not None and isinstance(nueva_palabra, Palabra):
                         nueva_palabra.add_aux_text(token_nlp.text, token_nlp.position_doc)
+
+
 
 
                 # Numeros
@@ -396,19 +451,10 @@ def preprocesing_oracion_nlp(texto):
         # quitar todos los tokens que sean de tipo puntuacion
         list_token_nlp = [token_nlp for token_nlp in list_token_nlp if token_nlp.tipo_morfol != TYPE_MORF_PUNCT]
         if list_token_nlp != []:
-            for token_nlp in list_token_nlp:
-                token_nlp.refresh_hijos_token_nlp()
             list_token_nlp_oraciones.append(list_token_nlp)
 
     return list_token_nlp_oraciones
 
-
-def refresh_hijos_token_nlp(token_nlp, list_token_nlp_oracion):
-    list_hijos = []
-    for token_nlp_hijo in token_nlp.children:
-        list_hijos.append(token_nlp_hijo)
-        list_hijos = list_hijos + det_hijos_token_nlp(token_nlp_hijo)
-    return list_hijos
 
 
 def spacy_patrones(doc, nlp):

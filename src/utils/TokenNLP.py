@@ -44,6 +44,7 @@ class TokenNLP:
         self.token_original_padre = token_padre
         self.palabra_padre_final = None
         self.tokens_relacion_padre_final = []
+        self.tokens_hijos = []
 
         self.text = token_actual.text
         self.tipo_morfol = token_actual.pos_
