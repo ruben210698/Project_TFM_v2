@@ -63,6 +63,8 @@ def get_rel_origen_and_dest_unidas(palabra):
     list_relaciones_pal.sort(key=lambda x: x.pal_tmp.numero_grafos, reverse=True)
     # eliminar todas las que no esten en relations_pending
     list_relaciones_pal = [rel for rel in list_relaciones_pal if rel in palabra.relations_pending]
+    list_relaciones_pal = [rel for rel in list_relaciones_pal
+                           if rel.pal_tmp.removed_pal is False and rel.pal_tmp_opuesta.removed_pal is False]
     return list_relaciones_pal
 
 

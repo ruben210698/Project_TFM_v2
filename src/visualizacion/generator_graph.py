@@ -561,11 +561,27 @@ def remove_relations_without_words(list_relaciones, list_palabras):
         if relation.pal_origen is None or relation.pal_dest is None or \
                 relation.pal_origen not in list_palabras or relation.pal_dest not in list_palabras:
             list_relaciones_to_remove.append(relation)
+        elif relation.pal_origen.removed_pal or relation.pal_dest.removed_pal:
+            list_relaciones_to_remove.append(relation)
 
     for relation in list_relaciones_to_remove:
         list_relaciones.remove(relation)
         relation.delete_relation()
     return list_relaciones
+
+
+def remove_words_without_relations(list_relaciones, list_palabras):
+    list_palabras_to_remove = []
+    for palabra in list_palabras:
+        list_rel_origen = Palabra.relaciones_dict_origen.get(palabra, [])
+        list_rel_dest = Palabra.relaciones_dict_destino.get(palabra, [])
+        if list_rel_origen == [] and list_rel_dest == []:
+            list_palabras_to_remove.append(palabra)
+
+    for palabra in list_palabras_to_remove:
+        list_palabras.remove(palabra)
+        palabra.delete_palabra()
+    return list_palabras
 
 
 def generate_graphs(list_palabras):
@@ -617,6 +633,7 @@ def text_tranformations(list_palabras, list_relaciones):
     #list_relaciones = unir_list_all_relaciones(list_relaciones)
 
     list_relaciones = remove_relations_without_words(list_relaciones, list_palabras)
+    list_palabras = remove_words_without_relations(list_relaciones, list_palabras)
     # al final:
     Palabra.refresh_relaciones_dict(list_relaciones)
     insertar_grafos_aproximados_palabras(list_palabras)
@@ -643,15 +660,7 @@ def text_tranformations(list_palabras, list_relaciones):
     return list_palabras, list_relaciones
 
 
-def generate_graph(texto, list_palabras, list_relaciones, palabra_deserializ, relacion_deserializ):
-    # Palabra.palabras_dict = palabra_deserializ.palabras_dict
-    # Palabra.palabras_dict_id = palabra_deserializ.palabras_dict_id
-    # Palabra.relaciones_dict_origen = palabra_deserializ.relaciones_dict_origen
-    # Palabra.relaciones_dict_destino = palabra_deserializ.relaciones_dict_destino
-
-    # Relacion.relaciones_dict = relacion_deserializ.relaciones_dict
-    # Relacion.relaciones_dict_id = relacion_deserializ.relaciones_dict_id
-
+def generate_graph(texto, list_palabras, list_relaciones):
     print(f"Numero de palabras: {len(list_palabras)}")
     list_palabras, list_relaciones = text_tranformations(list_palabras, list_relaciones)
 

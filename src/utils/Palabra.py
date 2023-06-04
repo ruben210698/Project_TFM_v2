@@ -106,6 +106,7 @@ class Palabra:
     def __init__(self, texto, tipo_morf, lugar_sintactico, id=None, importancia=None, num_relaciones=0,
                  autoincremental=True, txt_lema=None, position_doc=9999, num_oracion=0, token_nlp=None,
                  token_tag=None):
+        self.removed_pal = False
         self.token_nlp = token_nlp
         self.texto = texto
         self.txt_lema = txt_lema if txt_lema is not None else self.limpiar_texto(texto)
@@ -211,6 +212,9 @@ class Palabra:
             self.color_figura = colores_figura.DEFAULT
             #self.tipo_figura = figuras.FIGURA_RECTANGULO
 
+        # FIXME:
+        self.importancia = self.position_doc
+
 
 
 
@@ -270,6 +274,11 @@ class Palabra:
             del Palabra.relaciones_dict_destino[self]
         except Exception as _:
             pass
+        try:
+            del Palabra.palabras_dict_id[self.id]
+        except Exception as _:
+            pass
+        self.removed_pal = True
 
     @staticmethod
     def refresh_dict_palabras():

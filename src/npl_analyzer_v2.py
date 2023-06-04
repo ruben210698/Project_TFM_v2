@@ -15,6 +15,7 @@ from utils.Relacion import Relacion
 from constants.type_morfologico import *
 from constants.type_sintax import *
 from utils.TokenNLP import TokenNLP, TYPE_RELACION, TYPE_PALABRA
+from utils.utils_text import unir_palabras, mover_rel_a_pal_2
 from visualizacion.generator_graph import  generate_graph
 
 import sys
@@ -45,10 +46,74 @@ def get_list_palabras_relaciones(texto):
 
     list_palabras = get_list_palabras(list_token_nlp_oraciones)
     list_relaciones = get_list_relaciones(list_palabras)
+    list_relaciones, list_palabras = get_list_relaciones_detailed(list_relaciones, list_palabras)
     manejar_palabras_restantes(list_token_nlp_oraciones)
     relaciones_root_vb_cambio_suj_vb(list_relaciones)
 
     return list_palabras, list_relaciones
+
+
+def borrar_palabra_y_unir_relaciones(palabra_nlp, relacion_actual, list_relaciones, list_palabras):
+    origen_nlp = relacion_actual.pal_origen.token_nlp
+    destino_nlp = relacion_actual.pal_dest.token_nlp
+    tokens_hijos = palabra_nlp.tokens_hijos.copy() + [palabra_nlp.token_nlp_padre]
+    tokens_hijos = [hijo for hijo in tokens_hijos if hijo not in [origen_nlp, destino_nlp]]
+    # TODO sacar la relacion que tiene con los hijos la palabra origen y ver qué hacer
+    pal_padre = palabra_nlp.palabra_que_representa
+    if isinstance(pal_padre, Relacion):
+        return list_relaciones, list_palabras
+
+    for token_hijo in tokens_hijos:
+        pal_hijo = token_hijo.palabra_que_representa
+    #Palabra.relaciones_dict_origen.get(relacion_palabra.palabra_que_representa, [])
+    #Palabra.relaciones_dict_destino.get(relacion_palabra.palabra_que_representa, [])
+        mover_rel_a_pal_2(pal_padre, pal_hijo)
+
+    palabra_nlp.palabra_que_representa.delete_palabra()
+    return list_relaciones, list_palabras
+
+def get_list_relaciones_detailed(list_relaciones, list_palabras):
+    lista_morf_admitida = ['AUX', 'VERB']
+    list_relaciones_old = list_relaciones.copy()
+    for rel in list_relaciones_old:
+        # TODO Si no existe algo, try-except.
+        origen_nlp = rel.pal_origen.token_nlp
+        destino_nlp = rel.pal_dest.token_nlp
+        if origen_nlp is None or destino_nlp is None or isinstance(destino_nlp.palabra_que_representa, Relacion) \
+                or isinstance(origen_nlp.palabra_que_representa, Relacion):
+            continue
+
+        relacion_palabra = None
+        for hijo in origen_nlp.tokens_hijos:
+            if hijo.tokens_hijos.__len__() == 1 and relacion_palabra is None \
+                    and not isinstance(hijo.palabra_que_representa, Relacion):
+                
+                # ya que si es mayor seria relacion n-aria y sería un rombo
+                hijo_hijo = hijo.tokens_hijos[0]
+                #if hijo_hijo == destino_nlp and hijo.tipo_morfol in lista_morf_admitida:
+                if hijo.tipo_morfol in lista_morf_admitida:
+                    relacion_palabra = hijo
+                    list_relaciones, list_palabras = \
+                        borrar_palabra_y_unir_relaciones(hijo, rel, list_relaciones, list_palabras)
+
+
+        if relacion_palabra is None:
+            for hijo in destino_nlp.tokens_hijos:
+                if hijo.tokens_hijos.__len__() == 1 and relacion_palabra is None \
+                        and not isinstance(hijo.palabra_que_representa, Relacion):
+                    # ya que si es mayor seria relacion n-aria y sería un rombo
+                    hijo_hijo = hijo.tokens_hijos[0]
+                    #if hijo_hijo == destino_nlp and hijo.tipo_morfol in lista_morf_admitida:
+                    if hijo.tipo_morfol in lista_morf_admitida:
+                        relacion_palabra = hijo
+
+        if relacion_palabra is not None:
+            rel.texto = relacion_palabra.text
+            relacion_palabra.representado = True
+            relacion_palabra.palabra_que_representa = rel
+
+    return list_relaciones, list_palabras
+
 
 def preprocesing_detailed(list_token_nlp_oraciones):
 
@@ -59,6 +124,8 @@ def preprocesing_detailed(list_token_nlp_oraciones):
         # En este caso, ha habido un error y se ha colocado suelto cuando no se debe y debemos colocarlo
         # con la relación que le corresponde
         for token_nlp in oracion_nlp:
+            if token_nlp.position_doc == 0:
+                continue
             if token_nlp.tipo_morfol == 'AUX' and token_nlp.token_nlp_padre is not None \
                     and token_nlp.tokens_hijos == []:
                 # Un verbo suelto. Se deben refrescar las relaciones para que sean correctas.
@@ -76,6 +143,7 @@ def preprocesing_detailed(list_token_nlp_oraciones):
                     new_token_hijo.tokens_hijos.remove(token_nlp)
                     new_token_hijo.token_nlp_padre = token_nlp
                     new_token_padre.tokens_hijos.append(token_nlp)
+                    token_nlp.tokens_hijos.append(new_token_hijo)
                 else:
                     if pos_doc_actual < pos_doc_padre:
                         list_posibles_hijos = [token for token in token_nlp.token_nlp_padre.tokens_hijos if token.position_doc < pos_doc_actual]
@@ -244,12 +312,16 @@ def get_list_palabras(list_token_nlp_oraciones):
                     if nueva_palabra is not None and isinstance(nueva_palabra, Palabra):
                         nueva_palabra.add_aux_text(token_nlp.text, token_nlp.position_doc)
 
-                # Ahora el AUX que va con afjetivo, para "es impresionante"
+                # Ahora el AUX que va con adjetivo, para "es impresionante"
                 elif token_nlp.tipo_morfol == 'AUX' and token_nlp.lugar_sintact_original == 'cop' and \
                     token_nlp.token_nlp_padre is not None and token_nlp.token_nlp_padre.tipo_morfol in ('ADJ', 'NOUN'):
-                    nueva_palabra = token_nlp.token_nlp_padre.palabra_que_representa
-                    if nueva_palabra is not None and isinstance(nueva_palabra, Palabra):
-                        nueva_palabra.add_aux_text(token_nlp.text, token_nlp.position_doc)
+                    nueva_palabra = Palabra.constructor_alternativo(token_nlp=token_nlp)
+                    list_palabras.append(nueva_palabra)
+                    # Se crea la palabra para luego hacer bien las relaciones y luego ya se borrará
+                    #nueva_palabra = token_nlp.token_nlp_padre.palabra_que_representa
+                    #if nueva_palabra is not None and isinstance(nueva_palabra, Palabra):
+                    #    nueva_palabra.add_aux_text(token_nlp.text, token_nlp.position_doc)
+
 
                 # más rico, que vaya junto
                 elif token_nlp.tipo_morfol == 'ADV' and token_nlp.lugar_sintact_original == 'advmod' and \
@@ -279,6 +351,12 @@ def get_list_palabras(list_token_nlp_oraciones):
                     nueva_palabra = token_nlp.token_nlp_padre.palabra_que_representa
                     if nueva_palabra is not None and isinstance(nueva_palabra, Palabra):
                         nueva_palabra.add_aux_text(token_nlp.text, token_nlp.position_doc)
+                elif token_nlp.tipo_morfol in ['AUX', 'VERB'] and token_nlp.tokens_hijos.__len__() == 1:
+                    # Relaciones de 1 solo elemento.
+                    # Se crea la palabra para luego hacer bien las relaciones y luego ya se borrará
+                    nueva_palabra = Palabra.constructor_alternativo(token_nlp=token_nlp)
+                    list_palabras.append(nueva_palabra)
+
                 else:
                     nueva_palabra = Palabra.constructor_alternativo(token_nlp=token_nlp)
                     list_palabras.append(nueva_palabra)
@@ -603,7 +681,12 @@ def ejecutar_nlp_texto(texto, local=False):
         # Restaurar la salida estándar
         sys.stdout = sys.__stdout__
 
-        #fig = generate_graph(texto, list_palabras, list_relaciones)
+        print(list_palabras)
+        print(list_relaciones)
+
+        fig = generate_graph(texto, list_palabras, list_relaciones)
+        # TODO que aqui devuelva las listas serializadas para que luego el grafo lo genere bien
+        # dependiendo de lo que le pida
 
     except Exception as e:
         print("Error: ", e)

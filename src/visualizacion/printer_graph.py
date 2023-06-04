@@ -571,6 +571,8 @@ def draw_all_nodes(ax, position_elems, list_palabras):
 
         elif pal.tipo_figura == FIGURA_ROMBO:
             import matplotlib.patches as patches
+            if pal.dimension_x < 3:
+                pal.dimension_x = 3
             pal.tam_eje_x_figura = tam_figuras.ROMBO[0] * pal.dimension_x
             pal.tam_eje_y_figura = (tam_figuras.ROMBO[1] * pal.dimension_x) + pal.dimension_y
             # Crear el rombo
@@ -586,7 +588,6 @@ def draw_all_nodes(ax, position_elems, list_palabras):
             polygon = patches.Polygon(vertices, closed=True,
                                     facecolor=dict_color_figura.get(pal.lugar_sintactico, color_figura),
                                      edgecolor='black', zorder=2)
-
 
             ax.add_patch(polygon)
             ax.text(x, y, node_text, fontsize=12, ha='center', va='center', zorder=3,

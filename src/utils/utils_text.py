@@ -164,6 +164,38 @@ def unir_palabras_sin_relacion(pal1, pal2, list_relaciones, list_palabras, texto
     return list_relaciones, list_palabras
 
 
+def mover_rel_a_pal_2(pal1, pal2):
+    """
+    Esta funcion mira todas las relaciones en las que pal1 esta invlucrada y las cambia para que sean sustituidas por pal2
+    """
+    list_rel_pal1_palx = Palabra.relaciones_dict_origen[pal1].copy()
+    list_rel_palx_pal1 = Palabra.relaciones_dict_destino[pal1].copy()
+    list_rel_pal2_palx = Palabra.relaciones_dict_origen[pal2].copy()
+    list_rel_palx_pal2 = Palabra.relaciones_dict_destino[pal2].copy()
+    for rel in list_rel_palx_pal2:
+        if rel.pal_origen != pal1:
+            pass
+        else:
+            rel.delete_relation()
+    for rel in list_rel_pal2_palx:
+        if rel.pal_dest != pal1:
+            pass
+        else:
+            rel.delete_relation()
+
+    for rel in list_rel_palx_pal1:
+        if rel.pal_origen != pal2:
+            rel.change_pal_dest(pal2)
+        else:
+            rel.delete_relation()
+
+    for rel in list_rel_pal1_palx:
+        if rel.pal_dest != pal2:
+            rel.change_pal_origen(pal2)
+        else:
+            rel.delete_relation()
+
+
 
 def unir_palabras(pal1, pal2, list_relaciones, list_palabras):
     basic_relation = get_relation_entre_pal(pal1, pal2)
