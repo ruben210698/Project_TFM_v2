@@ -202,7 +202,7 @@ def get_lists_zoom_palabras(list_palabras, list_relaciones, position_elems, matr
             list_palabras_zoom.append(new_list_pal)
             if len(new_list_pal) == len(list_pal) + len(list_pal_grafo_anterior):
                 break
-        list_pal_grafo_anterior = new_list_pal.copy()
+        list_pal_grafo_anterior = list(set(new_list_pal.copy()))
 
     for list_palabras_custom in list_palabras_zoom:
         list_relaciones_new = get_relations_from_list_words(list_relaciones_all, list_palabras_custom)
@@ -224,7 +224,7 @@ def get_relations_from_list_words(list_relaciones_all, list_palabras_custom):
     for relation in list_relaciones_to_remove:
         list_relaciones.remove(relation)
 
-    return list_relaciones
+    return list(set(list_relaciones))
 
 
 
@@ -385,46 +385,46 @@ def draw_all_edges(ax, list_relaciones, position_elems, matrix_dim):
 
             if relation_draw.direccion_actual == DIR_DCHA:
                 x_dest_draw = coord_pal_dest[0] - pal_dest.tam_eje_x_figura/2
-                x_origen_draw = coord_pal_origen[0] + pal_origen.tam_eje_x_figura/2 - 0.5
+                x_origen_draw = coord_pal_origen[0] + pal_origen.tam_eje_x_figura/2 - 0.3
             elif relation_draw.direccion_actual == DIR_IZQ:
                 x_dest_draw = coord_pal_dest[0] + pal_dest.tam_eje_x_figura/2
-                x_origen_draw = coord_pal_origen[0] - pal_origen.tam_eje_x_figura/2 + 0.5
+                x_origen_draw = coord_pal_origen[0] - pal_origen.tam_eje_x_figura/2 + 0.3
             elif relation_draw.direccion_actual == DIR_ARRIBA:
                 y_dest_draw = coord_pal_dest[1] - pal_dest.tam_eje_y_figura/2 - 0.4
-                y_origen_draw = coord_pal_origen[1] + pal_origen.tam_eje_y_figura/2 - 0.5
+                y_origen_draw = coord_pal_origen[1] + pal_origen.tam_eje_y_figura/2 - 0.3
             elif relation_draw.direccion_actual == DIR_ABAJO:
                 y_dest_draw = coord_pal_dest[1] + pal_dest.tam_eje_y_figura/2 + 0.4
-                y_origen_draw = coord_pal_origen[1] - pal_origen.tam_eje_y_figura/2 + 0.5
+                y_origen_draw = coord_pal_origen[1] - pal_origen.tam_eje_y_figura/2 + 0.3
 
             elif relation_draw.direccion_actual == DIR_DCHA_ARRIBA:
-                x_dest_draw = coord_pal_dest[0] - pal_dest.tam_eje_x_figura/2 + 0.2
+                x_dest_draw = coord_pal_dest[0] - pal_dest.tam_eje_x_figura/2 - 0.2
                 y_dest_draw = coord_pal_dest[1] - pal_dest.tam_eje_y_figura/2 - 0.4
-                x_origen_draw = coord_pal_origen[0] + pal_origen.tam_eje_x_figura/2 - 1
-                y_origen_draw = coord_pal_origen[1] + pal_origen.tam_eje_y_figura/2 - 0.5
+                x_origen_draw = coord_pal_origen[0] + pal_origen.tam_eje_x_figura/2 - 0.5
+                y_origen_draw = coord_pal_origen[1] + pal_origen.tam_eje_y_figura/2 - 0.3
                 if x_dest_draw < x_origen_draw - 2:
                     x_dest_draw = coord_pal_dest[0]
                     x_origen_draw = coord_pal_origen[0] + 1
             elif relation_draw.direccion_actual == DIR_DCHA_ABAJO:
-                x_dest_draw = coord_pal_dest[0] - pal_dest.tam_eje_x_figura/2 + 0.2
+                x_dest_draw = coord_pal_dest[0] - pal_dest.tam_eje_x_figura/2 - 0.2
                 y_dest_draw = coord_pal_dest[1] + pal_dest.tam_eje_y_figura/2 + 0.4
-                x_origen_draw = coord_pal_origen[0] + pal_origen.tam_eje_x_figura/2 - 1
-                y_origen_draw = coord_pal_origen[1] - pal_origen.tam_eje_y_figura/2 + 0.5
+                x_origen_draw = coord_pal_origen[0] + pal_origen.tam_eje_x_figura/2 - 0.5
+                y_origen_draw = coord_pal_origen[1] - pal_origen.tam_eje_y_figura/2 + 0.3
                 if x_dest_draw < x_origen_draw - 2:
                     x_dest_draw = coord_pal_dest[0]
                     x_origen_draw = coord_pal_origen[0] + 1
             elif relation_draw.direccion_actual == DIR_IZQ_ARRIBA:
-                x_dest_draw = coord_pal_dest[0] + pal_dest.tam_eje_x_figura/2 - 0.2
+                x_dest_draw = coord_pal_dest[0] + pal_dest.tam_eje_x_figura/2 + 0.2
                 y_dest_draw = coord_pal_dest[1] - pal_dest.tam_eje_y_figura/2 - 0.4
-                x_origen_draw = coord_pal_origen[0] - pal_origen.tam_eje_x_figura/2 + 1
-                y_origen_draw = coord_pal_origen[1] + pal_origen.tam_eje_y_figura/2 - 0.5
+                x_origen_draw = coord_pal_origen[0] - pal_origen.tam_eje_x_figura/2 + 0.5
+                y_origen_draw = coord_pal_origen[1] + pal_origen.tam_eje_y_figura/2 - 0.3
                 if x_dest_draw > x_origen_draw - 2:
                     x_dest_draw = coord_pal_dest[0]
                     x_origen_draw = coord_pal_origen[0] - 1
             elif relation_draw.direccion_actual == DIR_IZQ_ABAJO:
-                x_dest_draw = coord_pal_dest[0] + pal_dest.tam_eje_x_figura/2 - 0.2
+                x_dest_draw = coord_pal_dest[0] + pal_dest.tam_eje_x_figura/2 + 0.2
                 y_dest_draw = coord_pal_dest[1] + pal_dest.tam_eje_y_figura/2 + 0.4
-                x_origen_draw = coord_pal_origen[0] - pal_origen.tam_eje_x_figura/2 + 1
-                y_origen_draw = coord_pal_origen[1] - pal_origen.tam_eje_y_figura/2 + 0.5
+                x_origen_draw = coord_pal_origen[0] - pal_origen.tam_eje_x_figura/2 + 0.5
+                y_origen_draw = coord_pal_origen[1] - pal_origen.tam_eje_y_figura/2 + 0.3
                 if x_dest_draw > x_origen_draw - 2:
                     x_dest_draw = coord_pal_dest[0]
                     x_origen_draw = coord_pal_origen[0] - 1
@@ -432,6 +432,30 @@ def draw_all_edges(ax, list_relaciones, position_elems, matrix_dim):
                 # TODO: que si no tiene direccion_actual, la calcule :)
                 logger.info("Error: dirección no contemplada", relation_draw.texto)
                 logger.info("###########")
+
+            if relation_draw.pal_dest.tipo_figura == FIGURA_ROMBO:
+                x_dest_draw, x_origen_draw, y_dest_draw, y_origen_draw = \
+                    calculo_flecha_dest_rombo(coord_pal_dest,
+                                              coord_pal_origen,
+                                              pal_dest, pal_origen,
+                                              relation_draw,
+                                              x_dest_draw,
+                                              x_origen_draw,
+                                              y_dest_draw,
+                                              y_origen_draw)
+
+            if relation_draw.pal_origen.tipo_figura == FIGURA_ROMBO:
+                x_dest_draw, x_origen_draw, y_dest_draw, y_origen_draw = \
+                    calculo_flecha_origen_rombo(coord_pal_dest,
+                                              coord_pal_origen,
+                                              pal_dest, pal_origen,
+                                              relation_draw,
+                                              x_dest_draw,
+                                              x_origen_draw,
+                                              y_dest_draw,
+                                              y_origen_draw)
+
+
 
             relation_draw.x_origen_draw = x_origen_draw
             relation_draw.y_origen_draw = y_origen_draw
@@ -456,6 +480,9 @@ def draw_all_edges(ax, list_relaciones, position_elems, matrix_dim):
             update_relation_in_matrix(matrix_dim, relation_draw)
 
             pos_label_aprox = None
+            # TODO arreglar ##############################
+            conflicto_texto_relacion = False
+            ##############################################
             if conflicto_texto_relacion:
                 x_dest_draw_arrow = x_dest_draw
                 x_origen_draw_arrow = x_origen_draw
@@ -518,6 +545,105 @@ def draw_all_edges(ax, list_relaciones, position_elems, matrix_dim):
             )
         except Exception as e:
             logger.debug("Error al dibujar la relación " + str(e))
+
+
+def calculo_flecha_dest_rombo(coord_pal_dest, coord_pal_origen, pal_dest, pal_origen, relation_draw, x_dest_draw,
+                              x_origen_draw, y_dest_draw, y_origen_draw):
+    """
+
+            pal.tam_eje_x_figura = tam_figuras.ROMBO[0] * pal.dimension_x
+            pal.tam_eje_y_figura = (tam_figuras.ROMBO[1] * pal.dimension_x) + pal.dimension_y
+            # Crear el rombo
+            vertices = [(x - pal.tam_eje_x_figura / 2, y),  # Punto izquierdo
+                        (x, y + pal.tam_eje_y_figura / 2),  # Punto superior
+                        (x + pal.tam_eje_x_figura / 2, y),  # Punto derecho
+                        (x, y - pal.tam_eje_y_figura / 2)]  # Punto inferior
+
+
+    """
+    if relation_draw.direccion_actual == DIR_DCHA:
+        x_dest_draw = coord_pal_dest[0] - pal_dest.tam_eje_x_figura / 2 - 0.5
+    elif relation_draw.direccion_actual == DIR_IZQ:
+        x_dest_draw = coord_pal_dest[0] + pal_dest.tam_eje_x_figura / 2 + 0.5
+    elif relation_draw.direccion_actual == DIR_ARRIBA:
+        y_dest_draw = coord_pal_dest[1] - pal_dest.tam_eje_y_figura / 2 - 0.4
+    elif relation_draw.direccion_actual == DIR_ABAJO:
+        y_dest_draw = coord_pal_dest[1] + pal_dest.tam_eje_y_figura / 2 + 0.4
+
+    elif relation_draw.direccion_actual == DIR_DCHA_ARRIBA:
+        x_dest_draw = coord_pal_dest[0] - pal_dest.tam_eje_x_figura / 4 - 0.2
+        y_dest_draw = coord_pal_dest[1] - pal_dest.tam_eje_y_figura / 4 - 0.2
+        if x_dest_draw < x_origen_draw - 2:
+            x_dest_draw = coord_pal_dest[0]
+    elif relation_draw.direccion_actual == DIR_DCHA_ABAJO:
+        x_dest_draw = coord_pal_dest[0] - pal_dest.tam_eje_x_figura / 4 - 0.2
+        y_dest_draw = coord_pal_dest[1] + pal_dest.tam_eje_y_figura / 4 + 0.2
+        if x_dest_draw < x_origen_draw - 2:
+            x_dest_draw = coord_pal_dest[0]
+    elif relation_draw.direccion_actual == DIR_IZQ_ARRIBA:
+        x_dest_draw = coord_pal_dest[0] + pal_dest.tam_eje_x_figura / 4 + 0.2
+        y_dest_draw = coord_pal_dest[1] - pal_dest.tam_eje_y_figura / 4 - 0.2
+        if x_dest_draw > x_origen_draw - 2:
+            x_dest_draw = coord_pal_dest[0]
+    elif relation_draw.direccion_actual == DIR_IZQ_ABAJO:
+        x_dest_draw = coord_pal_dest[0] + pal_dest.tam_eje_x_figura / 4 + 0.2
+        y_dest_draw = coord_pal_dest[1] + pal_dest.tam_eje_y_figura / 4 + 0.2
+        if x_dest_draw > x_origen_draw - 2:
+            x_dest_draw = coord_pal_dest[0]
+    else:
+        logger.info("Error: dirección no contemplada", relation_draw.texto)
+        logger.info("###########")
+    return x_dest_draw, x_origen_draw, y_dest_draw, y_origen_draw
+
+
+
+def calculo_flecha_origen_rombo(coord_pal_dest, coord_pal_origen, pal_dest, pal_origen, relation_draw, x_dest_draw,
+                              x_origen_draw, y_dest_draw, y_origen_draw):
+    """
+
+            pal.tam_eje_x_figura = tam_figuras.ROMBO[0] * pal.dimension_x
+            pal.tam_eje_y_figura = (tam_figuras.ROMBO[1] * pal.dimension_x) + pal.dimension_y
+            # Crear el rombo
+            vertices = [(x - pal.tam_eje_x_figura / 2, y),  # Punto izquierdo
+                        (x, y + pal.tam_eje_y_figura / 2),  # Punto superior
+                        (x + pal.tam_eje_x_figura / 2, y),  # Punto derecho
+                        (x, y - pal.tam_eje_y_figura / 2)]  # Punto inferior
+
+
+    """
+    if relation_draw.direccion_actual == DIR_DCHA:
+        x_origen_draw = coord_pal_origen[0] + pal_origen.tam_eje_x_figura / 2 - 0.5
+    elif relation_draw.direccion_actual == DIR_IZQ:
+        x_origen_draw = coord_pal_origen[0] - pal_origen.tam_eje_x_figura / 2 + 0.5
+    elif relation_draw.direccion_actual == DIR_ARRIBA:
+        y_origen_draw = coord_pal_origen[1] + pal_origen.tam_eje_y_figura / 2 - 0.5
+    elif relation_draw.direccion_actual == DIR_ABAJO:
+        y_origen_draw = coord_pal_origen[1] - pal_origen.tam_eje_y_figura / 2 + 0.5
+
+    elif relation_draw.direccion_actual == DIR_DCHA_ARRIBA:
+        x_origen_draw = coord_pal_origen[0] + pal_origen.tam_eje_x_figura / 4 - 0.5
+        y_origen_draw = coord_pal_origen[1] + pal_origen.tam_eje_y_figura / 4 - 0.5
+        if x_dest_draw < x_origen_draw - 2:
+            x_origen_draw = coord_pal_origen[0] + 1
+    elif relation_draw.direccion_actual == DIR_DCHA_ABAJO:
+        x_origen_draw = coord_pal_origen[0] + pal_origen.tam_eje_x_figura / 4 - 0.5
+        y_origen_draw = coord_pal_origen[1] - pal_origen.tam_eje_y_figura / 4 + 0.5
+        if x_dest_draw < x_origen_draw - 2:
+            x_origen_draw = coord_pal_origen[0] + 1
+    elif relation_draw.direccion_actual == DIR_IZQ_ARRIBA:
+        x_origen_draw = coord_pal_origen[0] - pal_origen.tam_eje_x_figura / 4 + 0.5
+        y_origen_draw = coord_pal_origen[1] + pal_origen.tam_eje_y_figura / 4 - 0.5
+        if x_dest_draw > x_origen_draw - 2:
+            x_origen_draw = coord_pal_origen[0] - 1
+    elif relation_draw.direccion_actual == DIR_IZQ_ABAJO:
+        x_origen_draw = coord_pal_origen[0] - pal_origen.tam_eje_x_figura / 4 + 0.5
+        y_origen_draw = coord_pal_origen[1] - pal_origen.tam_eje_y_figura / 4 + 0.5
+        if x_dest_draw > x_origen_draw - 2:
+            x_origen_draw = coord_pal_origen[0] - 1
+    else:
+        logger.info("Error: dirección no contemplada", relation_draw.texto)
+        logger.info("###########")
+    return x_dest_draw, x_origen_draw, y_dest_draw, y_origen_draw
 
 
 def draw_all_nodes(ax, position_elems, list_palabras):
