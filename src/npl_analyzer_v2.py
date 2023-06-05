@@ -48,6 +48,7 @@ def get_list_palabras_relaciones(texto):
     list_relaciones = get_list_relaciones(list_palabras)
     list_relaciones, list_palabras = get_list_relaciones_detailed(list_relaciones, list_palabras)
     manejar_palabras_restantes(list_token_nlp_oraciones)
+    list_relaciones, list_palabras = get_list_relaciones_detailed(list_relaciones, list_palabras)
     relaciones_root_vb_cambio_suj_vb(list_relaciones)
 
     return list_palabras, list_relaciones
@@ -57,7 +58,7 @@ def borrar_palabra_y_unir_relaciones(palabra_nlp, relacion_actual, list_relacion
     origen_nlp = relacion_actual.pal_origen.token_nlp
     destino_nlp = relacion_actual.pal_dest.token_nlp
     tokens_hijos = palabra_nlp.tokens_hijos.copy() + [palabra_nlp.token_nlp_padre]
-    tokens_hijos = [hijo for hijo in tokens_hijos if hijo not in [origen_nlp, destino_nlp]]
+    tokens_hijos = [hijo for hijo in tokens_hijos if hijo not in [origen_nlp, destino_nlp, None]]
     # TODO sacar la relacion que tiene con los hijos la palabra origen y ver qué hacer
     pal_padre = palabra_nlp.palabra_que_representa
     if isinstance(pal_padre, Relacion):
@@ -75,6 +76,10 @@ def borrar_palabra_y_unir_relaciones(palabra_nlp, relacion_actual, list_relacion
 def get_list_relaciones_detailed(list_relaciones, list_palabras):
     lista_morf_admitida = ['AUX', 'VERB']
     list_relaciones_old = list_relaciones.copy()
+    # TODO: no hacer con tokens hijos sino con palabras hijos. Es decir, en la primera vuelta, las palabras_hijo
+    #  son tokens hijos, pero en la segunda, las palabras hijo son palabras completas "a la playa" y de esa forma
+    #  si las detecta como 1 sola y no como 3.
+
     for rel in list_relaciones_old:
         # TODO Si no existe algo, try-except.
         origen_nlp = rel.pal_origen.token_nlp
@@ -106,6 +111,24 @@ def get_list_relaciones_detailed(list_relaciones, list_palabras):
                     #if hijo_hijo == destino_nlp and hijo.tipo_morfol in lista_morf_admitida:
                     if hijo.tipo_morfol in lista_morf_admitida:
                         relacion_palabra = hijo
+
+        if relacion_palabra is None:
+            # En caso de que lo anterior no funcione, tal vez sea porque Pal1 <- VB -> Pal2
+            # y Pal1 y Pal2 no tienen hijos, pero VB sí. En ese caso, se debe borrar VB y unir las relaciones
+            # de Pal1 y Pal2
+            destino_nlp_hijos = destino_nlp.tokens_hijos.copy()
+            destino_nlp_hijos = [a for a in destino_nlp_hijos if a != origen_nlp]
+            origen_nlp_hijos = origen_nlp.tokens_hijos.copy()
+            origen_nlp_hijos = [a for a in origen_nlp_hijos if a != destino_nlp]
+
+            if destino_nlp.tipo_morfol in lista_morf_admitida and destino_nlp_hijos.__len__() == 1:
+                relacion_palabra = destino_nlp
+                list_relaciones, list_palabras = \
+                    borrar_palabra_y_unir_relaciones(destino_nlp, rel, list_relaciones, list_palabras)
+            elif origen_nlp.tipo_morfol in lista_morf_admitida and origen_nlp_hijos.__len__() == 1:
+                relacion_palabra = origen_nlp
+                list_relaciones, list_palabras = \
+                    borrar_palabra_y_unir_relaciones(origen_nlp, rel, list_relaciones, list_palabras)
 
         if relacion_palabra is not None:
             rel.texto = relacion_palabra.text
