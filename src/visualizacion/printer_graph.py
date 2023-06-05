@@ -100,12 +100,14 @@ def _print_graph(list_palabras, list_relaciones, position_elems, matrix_dim):
     max_axis_x = max([x[0] for x in position_elems.values()])
     list_max_x = list([x for x in position_elems.keys() if position_elems.get(x)[0] + x.dimension_x >= max_axis_x])
     list_max_x.sort(key=lambda x: position_elems.get(x)[0] + x.dimension_x, reverse=True)
-    max_axis_x = list_max_x[0].dimension_x + list_max_x[0].pos_x
+    dim_pal_max_x = 3 if list_max_x[0].dimension_x < 3 else list_max_x[0].dimension_x
+    max_axis_x = dim_pal_max_x + list_max_x[0].pos_x
 
     min_axis_x = min([x[0] for x in position_elems.values()])
     list_min_x = list([x for x in position_elems.keys() if position_elems.get(x)[0] - x.dimension_x <= min_axis_x])
     list_min_x.sort(key=lambda x: position_elems.get(x)[0] - x.dimension_x, reverse=False)
-    min_axis_x = list_min_x[0].pos_x - list_min_x[0].dimension_x
+    dim_pal_min_x = 3 if list_min_x[0].dimension_x < 3 else list_min_x[0].dimension_x
+    min_axis_x = list_min_x[0].pos_x - dim_pal_min_x
 
 
     dif_y = abs(max_axis_y - min_axis_y)//2 - abs(max_axis_y - min_axis_y)//5
