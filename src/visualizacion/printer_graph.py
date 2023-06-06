@@ -2,6 +2,7 @@
 import random
 import shutil
 import os
+from queue import PriorityQueue
 
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -165,6 +166,100 @@ def _print_graph(list_palabras, list_relaciones, position_elems, matrix_dim):
     return fig
 
 
+def dijkstra(palabra_origen, palabra_destino, list_palabras):
+    # TODO explicar en la memoria el algoritmo de dijkstra
+    # FIXME control de errores.
+    dist = {palabra: float('inf') for palabra in list_palabras}
+    prev = {palabra: None for palabra in list_palabras}
+    q = PriorityQueue()
+    # Puede ser que la palabra origen sea el destino final
+    if Palabra.relaciones_dict_origen[palabra_origen] == [] and Palabra.relaciones_dict_origen[palabra_destino] != []:
+        palabra_origen, palabra_destino = palabra_destino, palabra_origen
+
+    dist[palabra_origen] = 0
+    q.put((0, palabra_origen.id))
+
+    rel_recorridas = []
+
+    while not q.empty():
+        _, u_id = q.get()
+        u = Palabra.palabras_dict_id[u_id]
+
+        if u == palabra_destino:
+            break
+
+        for rel in Palabra.relaciones_dict_origen[u] + Palabra.relaciones_dict_destino[u]:
+            if rel in rel_recorridas:
+                continue
+            rel_recorridas.append(rel)
+            alt = dist[u] + 1  # suponemos que todas las relaciones tienen peso 1
+            if u == rel.pal_origen:
+                if alt < dist[rel.pal_dest]:
+                    dist[rel.pal_dest] = alt
+                    prev[rel.pal_dest] = u
+                    q.put((alt, rel.pal_dest.id))
+            else:
+                if alt < dist[rel.pal_origen]:
+                    dist[rel.pal_origen] = alt
+                    prev[rel.pal_origen] = u
+                    q.put((alt, rel.pal_origen.id))
+
+    # Reconstruir el camino
+    camino = []
+    u = palabra_destino
+    while u is not None:
+        camino.insert(0, u)
+        u = prev[u]
+    return camino
+
+def get_palabras_necesarias_dijkstra(list_palabras, list_palabras_requeridas):
+    """
+    Tengo un programa en python en el que tengo 2 tipos de elementos: Palabras y Relaciones. Las palabras tienen una
+    propiedad llamada "relaciones_dict_origen" que es un diccionario, si yo hago Palabra.relaciones_dict_origen['pepe'],
+    me dice las relaciones de las que pepe es origen. Cada una de esas relaciones es de tipo Relacion y estas tienen
+    palabra_origen y palabra_destino. De esta forma puedo visualizar un grafo, ya que si hago
+    Palabra.relaciones_dict_origen['pepe'][0].palabra_destino, tengo la palabra1 y palabra 2. Y asi concatenarlo.
+    Mi problema es: Necesito obtener el camino mínimo entre 2 palabras enlazadas siguiendo estas relaciones,
+    necesito que me devuelva una lista con las palabras mínimas necesarias para crear esto. ¿Cómo lo hago?
+    Algoritmo A estrella.
+    El algoritmo de Dijkstra o el algoritmo A* (A estrella) pueden funcionar para tu caso, dependiendo de las
+    propiedades de tu grafo. El algoritmo de Dijkstra es bueno para encontrar el camino más corto en un grafo sin
+    pesos negativos, mientras que el algoritmo A* es mejor si tienes una heurística que puede ayudarte a buscar de
+    manera más eficiente.
+    Aunque parece que tu grafo no tiene pesos, por lo que el algoritmo de Dijkstra sería apropiado. Aquí te dejo una
+    posible implementación en Python
+
+    """
+    list_palabras = list_palabras.copy()
+    list_palabras_requeridas = list_palabras_requeridas.copy()
+    list_grafo_minimo = []
+
+    # tiene que ser un blucle con todas las palabras que vaya obteniendo :(  con While
+    if len(list_palabras_requeridas) <= 1:
+        return list_palabras_requeridas
+
+
+    list_palabras_requeridas_ptes = list_palabras_requeridas.copy()
+    grafo_provisional = [list_palabras_requeridas_ptes.pop(0)]
+    # while ALGUNA de las palabras requeridas no esten en lista_provisional_palabras:
+    while not all(elem in grafo_provisional for elem in list_palabras_requeridas):
+        palabra_destino = list_palabras_requeridas_ptes.pop(0)
+        lista_caminos_posibles = []
+        if palabra_destino in grafo_provisional:
+            continue
+        for palabra_origen_posible in grafo_provisional:
+            camino_provisional = dijkstra(palabra_origen_posible, palabra_destino, list_palabras)
+            camino_provisional = [pal for pal in camino_provisional if pal not in grafo_provisional]
+            if camino_provisional != []: # si fuese [] estaria en el grafo provisional
+                lista_caminos_posibles.append(camino_provisional)
+
+        # ordenar los caminos provisionales por longitud
+        lista_caminos_posibles.sort(key=len)
+        grafo_provisional = grafo_provisional + lista_caminos_posibles[0]
+
+    return grafo_provisional
+
+
 def get_lists_zoom_palabras(list_palabras, list_relaciones, position_elems, matrix_dim):
     list_palabras = list_palabras.copy()
     list_relaciones_all = list_relaciones.copy()
@@ -178,30 +273,25 @@ def get_lists_zoom_palabras(list_palabras, list_relaciones, position_elems, matr
     list_grafos.sort(key=lambda x: x.id, reverse=False)
 
     # Primero se crean nuevas listas por grafo, y después, dentro del grafo, por importancia y por palabras proximas:
-
     list_pal_grafo_anterior = []
+    list_sintagmas_requeridos = ['nsubj', 'advcl']
+    #list_sintagmas_requeridos = ['nsubj', 'conj']
+    #list_sintagmas_requeridos = ['nsubj', 'advcl', 'conj']
     for grafo in list_grafos:
         list_pal = grafo.palabras_list.copy()
-        list_pal.sort(key=lambda x: x.importancia, reverse=False)
-        limit_count_pal = [3, 7, 12, 20, 30, 40, 50, 999]
+        if list_sintagmas_requeridos == []:
+            list_palabras_requeridas = list_pal
+        else:
+            list_palabras_requeridas = [pal for pal in list_pal if pal.lugar_sintactico in list_sintagmas_requeridos]
         new_list_pal = list_pal_grafo_anterior.copy()
-        for limit in limit_count_pal:
-            new_list_pal = list_pal_grafo_anterior.copy()
-            count_pal = 0
-            for pal in list_pal:
-                # continuo en linea recta con un minimo de 3 palabras hasta que encuentre la siguiente palabra de mayor importancia fuera de la linea recta
-                if count_pal < limit:
-                    new_list_pal.append(pal)
-                else:
-                    # Si la siguiente palabra con mayor importancia esta a izq o dcha
-                    if pal.dict_posiciones[DIR_IZQ] == pal or pal.dict_posiciones[DIR_DCHA] == pal:
-                        new_list_pal.append(pal)
-                    else:
-                        break
-                count_pal += 1
-            list_palabras_zoom.append(new_list_pal)
-            if len(new_list_pal) == len(list_pal) + len(list_pal_grafo_anterior):
-                break
+
+        list_grafo_minimo = get_palabras_necesarias_dijkstra(list_palabras, list_palabras_requeridas)
+        # TODO añadir lista nueva
+        new_list_pal = new_list_pal + list_grafo_minimo
+
+        list_palabras_zoom.append(new_list_pal)
+        if len(new_list_pal) == len(list_pal) + len(list_pal_grafo_anterior):
+            break
         list_pal_grafo_anterior = list(set(new_list_pal.copy()))
 
     for list_palabras_custom in list_palabras_zoom:
