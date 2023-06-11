@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Generador de texto</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #ffffff;
+    }
+
+    .main-container {
+      width: 150%; /* Aumenta el tamaño en un 50% */
+      max-width: 1200px; /* Tamaño máximo */
+    }
+
+    .container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .image {
+      width: 50%;
+      max-width: 400px;
+    }
+
+    .form-container {
+      width: 50%;
+      padding: 20px;
+      box-sizing: border-box;
+      background-color: #fff;
+    }
+
+    textarea {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      box-sizing: border-box;
+      margin-bottom: 10px;
+      resize: vertical;
+    }
+
+    button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      box-sizing: border-box;
+      background-color: #000;
+      color: #fff;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="main-container">
+    <div class="container">
+      <div class="image">
+        <img src="graph_inicio.png" alt="Imagen estática" width="100%">
+      </div>
+      <div class="form-container">
+        <textarea placeholder="Introduce tu texto..." rows="6" oninput="insertLineBreak(event)"></textarea>
+        <button onclick="generar()">Generar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function insertLineBreak(event) {
+      var textarea = event.target;
+      var scrollHeight = textarea.scrollHeight;
+      textarea.style.height = scrollHeight + "px";
+      if (textarea.scrollTop > 0) {
+        textarea.style.height = scrollHeight + textarea.scrollTop + "px";
+      }
+    }
+
+    function generar() {
+      // Aquí puedes agregar la lógica para generar el resultado deseado con el texto ingresado
+    }
+  </script>
+</body>
+</html>
