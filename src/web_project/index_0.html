@@ -15,6 +15,25 @@
       width: 150%; /* Aumenta el tamaño en un 50% */
       max-width: 1200px; /* Tamaño máximo */
     }
+    .main-container-buscador {
+      width: 150%; /* Aumenta el tamaño en un 50% */
+      max-width: 1200px; /* Tamaño máximo */
+    }
+
+    .main-container-title {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      margin-top: -50px; /* Ajusta el valor del margen superior según tu preferencia */
+      margin-bottom: 0px; /* Ajusta el valor del margen superior según tu preferencia */
+    }
+    .main-container-title h1 {
+      font-family: 'Pristina', sans-serif;
+      font-size: 100px;
+    }
+
+
 
     .container {
       display: flex;
@@ -47,25 +66,35 @@
       display: block;
       width: 100%;
       padding: 10px;
+      padding-top: 15px;
+      padding-bottom: 15px;
       box-sizing: border-box;
       background-color: #000;
       color: #fff;
       border: none;
+      font-size: 17px;
     }
   </style>
 </head>
 <body>
   <div class="main-container">
-    <div class="container">
-      <div class="image">
-        <img src="graph_inicio.png" alt="Imagen estática" width="100%">
-      </div>
-      <div class="form-container">
-        <textarea placeholder="Introduce tu texto..." rows="6" oninput="insertLineBreak(event)"></textarea>
-        <button onclick="generar()">Generar</button>
+    <div class="main-container-title">
+      <h1>Lexygraphus</h1>
+    </div>
+
+    <div class="main-container-buscador">
+      <div class="container">
+        <div class="image">
+          <img src="graph_inicio.png" alt="Imagen estática" width="100%">
+        </div>
+        <div class="form-container">
+          <textarea placeholder="Introduce tu texto..." rows="12" oninput="insertLineBreak(event)"></textarea>
+          <button onclick="generar()">Generar</button>
+        </div>
       </div>
     </div>
   </div>
+
 
   <script>
     function insertLineBreak(event) {
