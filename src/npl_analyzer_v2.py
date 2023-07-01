@@ -21,6 +21,8 @@ from visualizacion.generator_graph import  generate_graph
 import sys
 from io import StringIO
 
+import asyncio
+
 
 def print_spacy_tree(doc):
     print()
@@ -672,7 +674,7 @@ def borrar_imagenes():
 
 
 txt_prints = ""
-def ejecutar_nlp_texto(texto, local=False):
+async def ejecutar_nlp_texto(texto, local=False):
     import pickle
     # Crear un objeto StringIO para redirigir la salida
     string_io = StringIO()
@@ -690,6 +692,27 @@ def ejecutar_nlp_texto(texto, local=False):
         #print("Relaciones: ", list_relaciones)
         for pal in list_palabras:
             print(pal.to_create_Palabra_str())
+
+        # TODO new
+        from async_datos_enlazados_wikipedia import async_get_entity_image_links
+        #from async_datos_enlazados import get_image_from_dbpedia_english, get_dbpedia_resource, get_entity_image_links
+        #import aiohttp, asyncio
+        # entity_image_links = {entity: get_image_from_dbpedia(get_dbpedia_resource(entity.token_nlp)) for entity in list_palabras}
+        import tracemalloc
+        tracemalloc.start()
+        result = await async_get_entity_image_links(list_palabras)
+
+        # asegúrate de que 'entities' es una lista de entidades
+        #TODO
+        ####################entity_image_links = get_entity_image_links(list_palabras)
+        # for pal in list_palabras:
+        #     if pal.texto == 'Los perros':
+        #         pal.url_image = 'http://commons.wikimedia.org/wiki/Special:FilePath/Blue_merle_koolie_short_coat_heading_sheep.jpg?width=300'
+        #     elif pal.texto == 'patos':
+        #         pal.url_image = 'http://commons.wikimedia.org/wiki/Special:FilePath/Bucephala-albeola-010.jpg?width=300'
+
+        ######################
+
 
         print()
         for rel in list_relaciones:

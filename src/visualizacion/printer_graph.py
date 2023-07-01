@@ -161,6 +161,7 @@ def _print_graph(list_palabras, list_relaciones, position_elems, matrix_dim):
         # Guardar figura en archivo
         plt.savefig(f"web_project/imagenes/imagen{i}")
 
+        plt.axis('off')
         plt.show()
 
     return fig
@@ -275,8 +276,10 @@ def get_lists_zoom_palabras(list_palabras, list_relaciones, position_elems, matr
     # Primero se crean nuevas listas por grafo, y después, dentro del grafo, por importancia y por palabras proximas:
     list_pal_grafo_anterior = []
     list_sintagmas_requeridos = ['nsubj', 'advcl']
+
     #list_sintagmas_requeridos = ['nsubj', 'conj']
     #list_sintagmas_requeridos = ['nsubj', 'advcl', 'conj']
+    list_sintagmas_requeridos = []
     for grafo in list_grafos:
         list_pal = grafo.palabras_list.copy()
         if list_sintagmas_requeridos == []:
@@ -744,6 +747,106 @@ def draw_all_nodes(ax, position_elems, list_palabras):
         logger.info(pal.texto)
         color_figura = pal.color_figura
         tipo_figura = pal.tipo_figura
+
+        if pal.url_image is not None:
+            try:
+                print(pal.url_image)
+                #pal.tam_eje_y_figura = 5
+                #pal.tam_eje_x_figura = 3
+                #############################################################
+                import urllib
+                from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+                from PIL import Image, ImageDraw, ImageFont
+                import svglib
+                from io import BytesIO
+
+                # Descarga la imagen desde la URL
+                image_data = urllib.request.urlopen(pal.url_image)
+                if pal.url_image.split(".")[-1] == 'svg':
+                    # pip uninstall reportlab
+                    # pip install reportlab[rl]
+
+                    import urllib.request
+                    from svglib.svglib import svg2rlg
+                    from reportlab.graphics import renderPM
+                    import io
+
+                    svg_data = image_data.read()
+
+                    # Convertir la imagen SVG a PDF utilizando svglib
+                    drawing = svg2rlg(io.BytesIO(svg_data))
+                    pdf_data = io.BytesIO()
+                    renderPM.drawToFile(drawing, pdf_data, fmt="PNG")
+
+                    # Leer la imagen PNG como una imagen PIL
+                    image = Image.open(io.BytesIO(pdf_data.getvalue()))
+
+                    # Guardar la imagen PNG
+                    image.save("image.png")
+
+                    # Leer la imagen PNG guardada
+                    image_read = Image.open("image.png")
+
+                    # Ahora puedes trabajar con la imagen cargada
+                    image_read.show()
+                else:
+                    # Carga la imagen utilizando PIL
+                    print("jpg")
+
+                    image = Image.open(image_data)
+
+                original_width, original_height = image.size
+                aspect_ratio = original_width / original_height
+                if original_width < original_height:
+                    new_width = 70
+                    new_height = int(new_width / aspect_ratio)
+                else:
+                    new_height = 70
+                    new_width = int(new_height * aspect_ratio)
+                image = image.resize((new_width, new_height))
+                #############################################################
+                background = Image.new('RGB', (new_width + 30, new_height + 50), 'white')
+
+                # Crea un objeto de dibujo
+                draw = ImageDraw.Draw(background)
+
+                # Define las coordenadas para el recuadro negro
+                rectangle_coords = [(10, 10), (new_width + 15, new_height + 40)]
+
+                # Dibuja el recuadro negro
+                draw.rectangle(rectangle_coords, outline='black')
+
+                # Pega la imagen redimensionada en el fondo blanco
+                background.paste(image, (15, 15))
+
+                # Define las coordenadas para el texto debajo de la imagen
+                text_x = 15
+                text_y = new_height + 25
+
+                # Agrega el texto en negro
+                text = pal.texto
+                font = ImageFont.truetype('arial.ttf', 12)  # Selecciona la fuente y el tamaño de fuente
+                draw.text((text_x, text_y), text, font=font, fill='black')
+
+                # Actualiza la variable "image" con la imagen final
+                image = background
+
+                #############################################################
+
+                # Crea el objeto OffsetImage con la imagen descargada
+                img = OffsetImage(image, zoom=1)
+                # Crea el parche de la imagen en las coordenadas especificadas
+                ab = AnnotationBbox(img, (x, y), frameon=False)
+                ax.add_artist(ab)
+
+                #ax.text(x, y - new_height / 2 - 10, pal.texto, fontsize=12, ha='center', va='center', color='black')
+
+                # Muestra el texto
+                #ax.text(x, y, node_text, fontsize=12, ha='center', va='center')
+                continue
+            except Exception as e:
+                print(e)
+                pass
 
         if tipo_figura == FIGURA_ELIPSE:
         #if pal.lugar_sintactico.lower() in (TYPE_SINTAX_ROOT):

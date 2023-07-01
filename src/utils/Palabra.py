@@ -108,6 +108,7 @@ class Palabra:
                  token_tag=None):
         self.removed_pal = False
         self.token_nlp = token_nlp
+        self.url_image = None
         self.texto = texto
         self.txt_lema = txt_lema if txt_lema is not None else self.limpiar_texto(texto)
         self.tipo_morf = tipo_morf
@@ -249,7 +250,7 @@ class Palabra:
     @staticmethod
     def get_dimension(texto):
         # Método que calcula la dimensión dependiendo del tamaño de la palabra
-        len_txt = sum(ancho_caracter.get(c, 8) for c in texto) // 12
+        len_txt = sum(ancho_caracter.get(c, 8) for c in texto) // 12 + 1
         return len_txt
         #return len(texto) - len(texto) // 4
 
