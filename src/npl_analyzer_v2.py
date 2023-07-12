@@ -694,7 +694,7 @@ async def ejecutar_nlp_texto(texto, local=False):
             print(pal.to_create_Palabra_str())
 
         # TODO new
-        from async_datos_enlazados_wikipedia import async_get_entity_image_links
+        from async_datos_enlazados_pexels import async_get_entity_image_links
         #from async_datos_enlazados import get_image_from_dbpedia_english, get_dbpedia_resource, get_entity_image_links
         #import aiohttp, asyncio
         # entity_image_links = {entity: get_image_from_dbpedia(get_dbpedia_resource(entity.token_nlp)) for entity in list_palabras}

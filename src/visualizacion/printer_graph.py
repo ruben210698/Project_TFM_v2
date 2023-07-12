@@ -266,42 +266,79 @@ def get_lists_zoom_palabras(list_palabras, list_relaciones, position_elems, matr
     list_relaciones_all = list_relaciones.copy()
     position_elems = position_elems.copy()
     matrix_dim = matrix_dim.copy()
-    list_palabras_zoom = []
-    list_relaciones_zoom = []
+    list_palabras_zoom_fase = []
+    list_relaciones_zoom_fase = []
 
     # de todas las palabras que hay en list_palabras, cuantos grafos diferentes hay
     list_grafos = list(set([a.grafo for a in list_palabras]))
     list_grafos.sort(key=lambda x: x.id, reverse=False)
 
     # Primero se crean nuevas listas por grafo, y después, dentro del grafo, por importancia y por palabras proximas:
+    """
+    Sintagmas Nominales: Incluyen sustantivos (como sujetos y objetos directos) y sus modificadores adjetivales (amod).
+    
+    Sintagmas Verbales: Incluyen verbos y sus complementos, como objetos directos (dobj), complementos indirectos (iobj) y complementos de cláusula (ccomp).
+    
+    Sintagmas Adverbiales: Incluyen adverbios y sus modificadores adverbiales (advmod) que proporcionan información de tiempo, lugar, modo, etc.
+    
+    Sintagmas Preposicionales: Incluyen preposiciones y sus objetos preposicionales (pobj) que indican relaciones espaciales o temporales.
+    
+    Sintagmas de Clausulas Adjetivas: Incluyen cláusulas adjetivas (acl) que modifican a un sustantivo.
+    
+    Sintagmas de Clausulas Adverbiales: Incluyen cláusulas adverbiales (advcl) que funcionan como un adverbio, proporcionando información adicional sobre la acción.
+    
+    Otros Sintagmas Modificadores: Incluyen modificadores diversos como marcadores (mark), conjunciones (cc), complementos circunstanciales (obl) y modificador adverbial de un sintagma nominal (npadvmod).
+    """
     list_pal_grafo_anterior = []
-    list_sintagmas_requeridos = ['nsubj', 'advcl']
+    list_sintagmas_requeridos1 = ['nsubj', 'ROOT']
+    list_sintagmas_requeridos2 = list_sintagmas_requeridos1 + ['COP', 'nmod', 'amod', 'iobj', 'dobj', 'ccomp']
+    list_sintagmas_requeridos3 = list_sintagmas_requeridos2 + ['advcl', 'advmod', 'obl']
+    list_sintagmas_requeridos4 = list_sintagmas_requeridos3 + ['PREP', 'pobj']
+    list_sintagmas_requeridos5 = list_sintagmas_requeridos4 + ['acl', 'amod']
+    list_sintagmas_requeridos6 = list_sintagmas_requeridos5 + ['mark', 'cc', 'cc', 'npadvmod']
+    list_sintagmas_requeridos7 = []
+
+    lista_fases_grafo = [list_sintagmas_requeridos1, list_sintagmas_requeridos2, list_sintagmas_requeridos3,
+                            list_sintagmas_requeridos4, list_sintagmas_requeridos5, list_sintagmas_requeridos6,
+                            list_sintagmas_requeridos7]
+
 
     #list_sintagmas_requeridos = ['nsubj', 'conj']
     #list_sintagmas_requeridos = ['nsubj', 'advcl', 'conj']
-    list_sintagmas_requeridos = []
-    for grafo in list_grafos:
-        list_pal = grafo.palabras_list.copy()
-        if list_sintagmas_requeridos == []:
-            list_palabras_requeridas = list_pal
+
+    list_palabras_zoom_fase_anterior = []
+    list_palabras_zoom_final, list_relaciones_zoom_final = [], []
+    for list_sintagmas_requeridos in lista_fases_grafo:
+        list_palabras_zoom_fase = []
+        for grafo in list_grafos:
+            list_pal = grafo.palabras_list.copy()
+            if list_sintagmas_requeridos == []:
+                list_palabras_requeridas = list_pal
+            else:
+                list_palabras_requeridas = [pal for pal in list_pal if pal.lugar_sintactico in list_sintagmas_requeridos]
+
+            list_grafo_minimo = get_palabras_necesarias_dijkstra(list_palabras, list_palabras_requeridas)
+
+            list_palabras_zoom_fase += list_grafo_minimo
+            list_palabras_zoom_fase = list(set(list_palabras_zoom_fase))
+
+        if len([a in list_palabras_zoom_fase for a in list_palabras_zoom_fase_anterior]) == len(list_palabras_zoom_fase):
+            continue
+
         else:
-            list_palabras_requeridas = [pal for pal in list_pal if pal.lugar_sintactico in list_sintagmas_requeridos]
-        new_list_pal = list_pal_grafo_anterior.copy()
+            list_palabras_zoom_fase_anterior = list_palabras_zoom_fase
+            list_palabras_zoom_final.append(list_palabras_zoom_fase)
 
-        list_grafo_minimo = get_palabras_necesarias_dijkstra(list_palabras, list_palabras_requeridas)
-        # TODO añadir lista nueva
-        new_list_pal = new_list_pal + list_grafo_minimo
+    #list_palabras_zoom_fase_copy = list_palabras_zoom_fase.copy()
+    #for list_palabras_custom in list_palabras_zoom_fase_copy:
+    #    if list_palabras_custom is None or list_palabras_custom == [] or len(list_palabras_custom) == 1:
+    #        list_palabras_zoom_fase.remove(list_palabras_custom)
 
-        list_palabras_zoom.append(new_list_pal)
-        if len(new_list_pal) == len(list_pal) + len(list_pal_grafo_anterior):
-            break
-        list_pal_grafo_anterior = list(set(new_list_pal.copy()))
-
-    for list_palabras_custom in list_palabras_zoom:
+    for list_palabras_custom in list_palabras_zoom_final:
         list_relaciones_new = get_relations_from_list_words(list_relaciones_all, list_palabras_custom)
-        list_relaciones_zoom.append(list_relaciones_new)
+        list_relaciones_zoom_final.append(list_relaciones_new)
 
-    return list_palabras_zoom, list_relaciones_zoom
+    return list_palabras_zoom_final, list_relaciones_zoom_final
 
 
 
@@ -759,41 +796,27 @@ def draw_all_nodes(ax, position_elems, list_palabras):
                 from PIL import Image, ImageDraw, ImageFont
                 import svglib
                 from io import BytesIO
+                import requests
 
                 # Descarga la imagen desde la URL
-                image_data = urllib.request.urlopen(pal.url_image)
-                if pal.url_image.split(".")[-1] == 'svg':
-                    # pip uninstall reportlab
-                    # pip install reportlab[rl]
+                #image_data = urllib.request.urlopen(pal.url_image)
+                filename = 'image.jpg'
+                #urllib.request.urlretrieve(pal.url_image, 'image.jpg')
+                response = requests.get(pal.url_image)
 
-                    import urllib.request
-                    from svglib.svglib import svg2rlg
-                    from reportlab.graphics import renderPM
-                    import io
+                #if response.status_code == 200:
+                #    with open(filename, 'wb') as file:
+                #        file.write(response.content)
+                #    print('Imagen descargada exitosamente.')
+                #else:
+                #    print('Error al descargar la imagen:', response.status_code)
 
-                    svg_data = image_data.read()
 
-                    # Convertir la imagen SVG a PDF utilizando svglib
-                    drawing = svg2rlg(io.BytesIO(svg_data))
-                    pdf_data = io.BytesIO()
-                    renderPM.drawToFile(drawing, pdf_data, fmt="PNG")
+                # Carga la imagen utilizando PIL
+                print("jpg")
 
-                    # Leer la imagen PNG como una imagen PIL
-                    image = Image.open(io.BytesIO(pdf_data.getvalue()))
-
-                    # Guardar la imagen PNG
-                    image.save("image.png")
-
-                    # Leer la imagen PNG guardada
-                    image_read = Image.open("image.png")
-
-                    # Ahora puedes trabajar con la imagen cargada
-                    image_read.show()
-                else:
-                    # Carga la imagen utilizando PIL
-                    print("jpg")
-
-                    image = Image.open(image_data)
+                image_data = response.content
+                image = Image.open(BytesIO(image_data))
 
                 original_width, original_height = image.size
                 aspect_ratio = original_width / original_height
