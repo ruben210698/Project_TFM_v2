@@ -1,0 +1,40 @@
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+.navigation {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+button {
+    padding: 15px 25px;
+    font-size: 20px;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    background-color: #007BFF;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.image-container {
+    max-height: 80vh;
+    max-width: 80vw;
+    overflow: auto;
+    margin-top: 160px; /* Aumentar el valor para más espacio */
+}
+
+#image {
+    max-height: 100%;
+    max-width: 100%;
+    
+}

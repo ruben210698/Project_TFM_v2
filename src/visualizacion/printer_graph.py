@@ -31,6 +31,7 @@ from utils.logger import FORMAT_1, create_logger
 PAL_DEBUG = 'naturaleza'
 PAL_DEBUG = os.getenv('PAL_DEBUG', '')
 ZOOM_ACTIVE = eval(os.getenv('ZOOM_ACTIVE', 'True'))
+PICTOGRAM_ACTIVE = eval(os.getenv('PICTOGRAM_ACTIVE', 'True'))
 
 PRINT_IMG = eval(os.getenv('PRINT_IMG', 'True'))
 PRINT_GRAPH = eval(os.getenv('PRINT_GRAPH', 'True'))
@@ -154,7 +155,7 @@ def _print_graph(list_palabras, list_relaciones, position_elems, matrix_dim):
         ax.set_ylim(min_axis_y, max_axis_y)
         ax.set_xlim(min_axis_x, max_axis_x)
         ax.set_aspect('equal')
-        ax.axis('on')
+        ax.axis('off')
 
         ax.plot()
 
@@ -431,6 +432,9 @@ def draw_edge(ax, u, v, width=1.0, color='k', label='', label_offset=(0, 0), bol
         ### # esta dando un error de que {TypeError}'FancyArrowPatch' object is not callable
 
     else:
+        #if PICTOGRAM_ACTIVE:
+            #arrow = FancyArrowPatch(u, v, arrowstyle='-', mutation_scale=20, linewidth=width, color=color)
+        #else:
         arrow = FancyArrowPatch(u, v, arrowstyle='->', mutation_scale=20, linewidth=width, color=color)
         ax.add_patch(arrow)
 
@@ -785,7 +789,7 @@ def draw_all_nodes(ax, position_elems, list_palabras):
         color_figura = pal.color_figura
         tipo_figura = pal.tipo_figura
 
-        if pal.url_image is not None:
+        if PICTOGRAM_ACTIVE and pal.url_image is not None:
             try:
                 print(pal.url_image)
                 #pal.tam_eje_y_figura = 5
@@ -828,22 +832,22 @@ def draw_all_nodes(ax, position_elems, list_palabras):
                     new_width = int(new_height * aspect_ratio)
                 image = image.resize((new_width, new_height))
                 #############################################################
-                background = Image.new('RGB', (new_width + 30, new_height + 50), 'white')
+                background = Image.new('RGB', (new_width + 8, new_height + 41), 'white')
 
                 # Crea un objeto de dibujo
                 draw = ImageDraw.Draw(background)
 
                 # Define las coordenadas para el recuadro negro
-                rectangle_coords = [(10, 10), (new_width + 15, new_height + 40)]
+                rectangle_coords = [(2, 10), (new_width + 7, new_height + 40)]
 
                 # Dibuja el recuadro negro
                 draw.rectangle(rectangle_coords, outline='black')
 
                 # Pega la imagen redimensionada en el fondo blanco
-                background.paste(image, (15, 15))
+                background.paste(image, (5, 15))
 
                 # Define las coordenadas para el texto debajo de la imagen
-                text_x = 15
+                text_x = 5
                 text_y = new_height + 25
 
                 # Agrega el texto en negro

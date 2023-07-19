@@ -2,6 +2,7 @@
 Con spicy NPL quiero pasarle una frase y que me saque las caracteristicas morg¡fologicas y sintacticas de cada palabra.
 Tambien quiero que cree relaciones entre ellas.
 """
+import os
 import spacy
 from unidecode import unidecode
 from spacy.matcher import Matcher
@@ -22,6 +23,8 @@ import sys
 from io import StringIO
 
 import asyncio
+
+PICTOGRAM_ACTIVE = eval(os.getenv('PICTOGRAM_ACTIVE', 'True'))
 
 
 def print_spacy_tree(doc):
@@ -694,24 +697,26 @@ async def ejecutar_nlp_texto(texto, local=False):
             print(pal.to_create_Palabra_str())
 
         # TODO new
-        from async_datos_enlazados_pexels import async_get_entity_image_links
-        #from async_datos_enlazados import get_image_from_dbpedia_english, get_dbpedia_resource, get_entity_image_links
-        #import aiohttp, asyncio
-        # entity_image_links = {entity: get_image_from_dbpedia(get_dbpedia_resource(entity.token_nlp)) for entity in list_palabras}
-        import tracemalloc
-        tracemalloc.start()
-        result = await async_get_entity_image_links(list_palabras)
 
-        # asegúrate de que 'entities' es una lista de entidades
-        #TODO
-        ####################entity_image_links = get_entity_image_links(list_palabras)
-        # for pal in list_palabras:
-        #     if pal.texto == 'Los perros':
-        #         pal.url_image = 'http://commons.wikimedia.org/wiki/Special:FilePath/Blue_merle_koolie_short_coat_heading_sheep.jpg?width=300'
-        #     elif pal.texto == 'patos':
-        #         pal.url_image = 'http://commons.wikimedia.org/wiki/Special:FilePath/Bucephala-albeola-010.jpg?width=300'
+        if PICTOGRAM_ACTIVE:
+            from async_datos_enlazados_pexels import async_get_entity_image_links
+            #from async_datos_enlazados import get_image_from_dbpedia_english, get_dbpedia_resource, get_entity_image_links
+            #import aiohttp, asyncio
+            # entity_image_links = {entity: get_image_from_dbpedia(get_dbpedia_resource(entity.token_nlp)) for entity in list_palabras}
+            import tracemalloc
+            tracemalloc.start()
+            result = await async_get_entity_image_links(list_palabras)
 
-        ######################
+            # asegúrate de que 'entities' es una lista de entidades
+            #TODO
+            ####################entity_image_links = get_entity_image_links(list_palabras)
+            # for pal in list_palabras:
+            #     if pal.texto == 'Los perros':
+            #         pal.url_image = 'http://commons.wikimedia.org/wiki/Special:FilePath/Blue_merle_koolie_short_coat_heading_sheep.jpg?width=300'
+            #     elif pal.texto == 'patos':
+            #         pal.url_image = 'http://commons.wikimedia.org/wiki/Special:FilePath/Bucephala-albeola-010.jpg?width=300'
+
+            ######################
 
 
         print()
