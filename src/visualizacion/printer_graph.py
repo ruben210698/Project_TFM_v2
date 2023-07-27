@@ -32,6 +32,7 @@ PAL_DEBUG = 'naturaleza'
 PAL_DEBUG = os.getenv('PAL_DEBUG', '')
 ZOOM_ACTIVE = eval(os.getenv('ZOOM_ACTIVE', 'True'))
 PICTOGRAM_ACTIVE = eval(os.getenv('PICTOGRAM_ACTIVE', 'True'))
+print(PICTOGRAM_ACTIVE)
 
 PRINT_IMG = eval(os.getenv('PRINT_IMG', 'True'))
 PRINT_GRAPH = eval(os.getenv('PRINT_GRAPH', 'True'))
@@ -788,6 +789,9 @@ def draw_all_nodes(ax, position_elems, list_palabras):
         logger.info(pal.texto)
         color_figura = pal.color_figura
         tipo_figura = pal.tipo_figura
+        PICTOGRAM_ACTIVE = eval(os.getenv('PICTOGRAM_ACTIVE', 'True'))
+        print('PICTOGRAM_ACTIVE')
+        print(PICTOGRAM_ACTIVE)
 
         if PICTOGRAM_ACTIVE and pal.url_image is not None:
             try:

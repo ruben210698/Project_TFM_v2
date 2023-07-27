@@ -17,7 +17,7 @@ from constants.type_morfologico import *
 from constants.type_sintax import *
 from utils.TokenNLP import TokenNLP, TYPE_RELACION, TYPE_PALABRA
 from utils.utils_text import unir_palabras, mover_rel_a_pal_2
-from visualizacion.generator_graph import  generate_graph
+from visualizacion.generator_graph import generate_graph
 
 import sys
 from io import StringIO
@@ -697,7 +697,9 @@ async def ejecutar_nlp_texto(texto, local=False):
             print(pal.to_create_Palabra_str())
 
         # TODO new
-
+        PICTOGRAM_ACTIVE = eval(os.getenv('PICTOGRAM_ACTIVE', 'True'))
+        print('PICTOGRAM_ACTIVE')
+        print(PICTOGRAM_ACTIVE)
         if PICTOGRAM_ACTIVE:
             from async_datos_enlazados_pexels import async_get_entity_image_links
             #from async_datos_enlazados import get_image_from_dbpedia_english, get_dbpedia_resource, get_entity_image_links

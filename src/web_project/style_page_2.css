@@ -29,8 +29,7 @@ button:hover {
 .image-container {
     max-height: 80vh;
     max-width: 80vw;
-    overflow: auto;
-    margin-top: 160px; /* Aumentar el valor para más espacio */
+    margin-top: 60px; /* Aumentar el valor para más espacio */
 }
 
 #image {

@@ -2,7 +2,7 @@ let imageIndex = 0;
 
 function updateImage() {
     const image = document.getElementById("image");
-    image.src = "imagenes_show/imagen" + imageIndex + ".png";
+    image.src = "imagenes/imagen" + imageIndex + ".png";
     console.log("Imagen actualizada a: " + image.src);
 }
 

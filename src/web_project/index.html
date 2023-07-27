@@ -1,50 +1,23 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Imágenes</title>
-    <link rel="stylesheet" href="style.css">
-    <style>
-       body {
-          margin: 0;
-          padding: 0;
-          display: flex;
-          flex-direction: column;
-          min-height: 100vh;
-        }
-        #image-container {
-            position: relative;
-            height: auto;
-            width: 100%;
-            margin: 20px;
-          }
-
-        #texto-container {
-          margin: 20px 0;
-          flex: 1;
-          overflow-y: auto;
-          white-space: pre-line;
-          word-wrap: break-word;
-
-        }
-  </style>
-
-
-
-  </head>
-  <body>
-  <div id="input-container">
-      <textarea id="texto-input" rows="4" cols="50" placeholder="Ingresa el texto"></textarea>
-      <button id="enviar-btn">Enviar</button>
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+  <div class="navigation">
+    <textarea id="inputText" placeholder="Introduce texto aquí"></textarea>
+    <div class="checkbox-label">
+      <input type="checkbox" id="includeImages">
+      <label for="includeImages">Incluir imágenes</label>
     </div>
-  <div id="button-container">
-    <button id="previous">Anterior</button>
-    <button id="next">Siguiente</button>
+    <button type="submit" id="submitBtn">Enviar</button>
+    <div id="progressBarContainer" class="hidden">
+      <div id="progressBar"></div>
+    </div>
   </div>
-  <div id="image-container"></div>
-
-
-
-
+  <div class="image-container">
+  </div>
   <script src="script.js"></script>
 </body>
 </html>

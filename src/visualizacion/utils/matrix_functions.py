@@ -45,8 +45,7 @@ def generate_matrix(list_palabras):
 
 
 def imprimir_matriz(matriz):
-
-
+    PRINT_MATRIX = eval(os.getenv('PRINT_MATRIX', 'False'))
     try:
         if not PRINT_MATRIX:
             return
